@@ -1,0 +1,24 @@
+const mongoose = require("mongoose");
+
+const optSchema = new mongoose.Schema({
+  type: {
+    type: String,
+    required: true,
+  },
+  doc: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Doc",
+  },
+  employeeId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Employee",
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+});
+
+const Opt = mongoose.model("Opt", optSchema);
+
+module.exports = Opt;
