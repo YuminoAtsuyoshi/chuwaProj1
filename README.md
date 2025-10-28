@@ -35,6 +35,10 @@ peisonghao_db_user
 Test1234
 ```
 
+## 创建uploads文件夹
+
+在backend文件夹下创建uploads文件夹用于存储保存的文件
+
 ## 安装依赖
 
 ```bash
