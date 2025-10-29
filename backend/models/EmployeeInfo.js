@@ -1,5 +1,29 @@
 const mongoose = require("mongoose");
 
+const referenceSchema = new mongoose.Schema({
+  firstName: {
+    type: String,
+    required: true,
+  },
+  lastName: {
+    type: String,
+    required: true,
+  },
+  middleName: {
+    type: String,
+  },
+  phone: {
+    type: String,
+  },
+  email: {
+    type: String,
+  },
+  relationship: {
+    type: String,
+    required: true,
+  },
+});
+
 const employeeInfoSchema = new mongoose.Schema({
   employeeId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -19,7 +43,7 @@ const employeeInfoSchema = new mongoose.Schema({
   preferredName: {
     type: String,
   },
-  profilePirture: {
+  profilePicture: {
     type: String,
     default:
       "https://upload.wikimedia.org/wikipedia/commons/8/83/Default-Icon.jpg",
@@ -84,30 +108,6 @@ const employeeInfoSchema = new mongoose.Schema({
       },
       message: "There should be at least one emergency contact",
     },
-  },
-});
-
-const referenceSchema = new mongoose.Schema({
-  firstName: {
-    type: String,
-    required: true,
-  },
-  lastName: {
-    type: String,
-    required: true,
-  },
-  middleName: {
-    type: String,
-  },
-  phone: {
-    type: String,
-  },
-  email: {
-    type: String,
-  },
-  relationship: {
-    type: String,
-    required: true,
   },
 });
 

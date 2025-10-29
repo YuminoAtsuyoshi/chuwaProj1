@@ -17,9 +17,11 @@ cd backend
 ```
 MONGODB_URI=mongodb+srv://<db_username>:<db_password>@cluster0.cdwqqvy.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
 JWT_SECRET=<jwt_secret>
+SMTP_USER=zxy119010445@163.com
+SMTP_PASS=ABXenwBkkyQ3n2hj
 ```
 
-<db_username> 和 <db_password> 需要改成云端创建的账户和密码，<jwt_secret>自行设置
+<db_username> 和 <db_password> 需要改成云端创建的账户和密码，<jwt_secret>自行设置；SMTP_USER 和 SMTP_PASS 为发送邮件用
 
 账户：
 
@@ -35,9 +37,9 @@ peisonghao_db_user
 Test1234
 ```
 
-## 创建uploads文件夹
+## 创建 uploads 文件夹
 
-在backend文件夹下创建uploads文件夹用于存储保存的文件
+在 backend 文件夹下创建 uploads 文件夹用于存储保存的文件
 
 ## 安装依赖
 

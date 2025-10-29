@@ -14,7 +14,7 @@ router.get("/:employeeId", authMiddleware, getEmployeeInfo);
 router.put(
   "/:employeeId",
   authMiddleware,
-  upload.single("profilePirture"),
+  upload.single("profilePicture"),
   updateEmployeeInfo
 );
 router.post("/:employeeId", authMiddleware, submitForm);
