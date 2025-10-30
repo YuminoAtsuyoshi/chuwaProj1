@@ -18,7 +18,7 @@ cd backend
 MONGODB_URI=mongodb+srv://<db_username>:<db_password>@cluster0.cdwqqvy.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
 JWT_SECRET=<jwt_secret>
 SMTP_USER=zxy119010445@163.com
-SMTP_PASS=ABXenwBkkyQ3n2hj
+SMTP_PASS=UKMKqxjQwn9WstNM
 ```
 
 <db_username> 和 <db_password> 需要改成云端创建的账户和密码，<jwt_secret>自行设置；SMTP_USER 和 SMTP_PASS 为发送邮件用
