@@ -6,6 +6,7 @@ const employeeInfoRouter = require("./routers/employeeInfo");
 const authRouter = require("./routers/auth");
 const docsRouter = require("./routers/docs");
 const optsRouter = require("./routers/opts");
+const tokensRouter = require("./routers/tokens");
 const errorHandlerMiddleware = require("./middlewares/errorHandler");
 const app = express();
 const fs = require("fs");
@@ -27,6 +28,7 @@ app.use("/api/employee-info", employeeInfoRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/docs", docsRouter);
 app.use("/api/opts", optsRouter);
+app.use("/api/registration-tokens", tokensRouter);
 
 // Health Check API
 app.get("/health", (req, res) => {
@@ -66,5 +68,5 @@ app.use(errorHandlerMiddleware);
 
 app.listen(3000, () => {
   console.log("Server is running on port 3000");
-  console.log(`Health check: http://localhost:300/health`);
+  console.log(`Health check: http://localhost:3000/health`);
 });

@@ -8,8 +8,8 @@ const router = express.Router();
 router.post("/login", async (req, res, next) => {
   try {
     console.log("Login request body:", req.body);
-    const { username, password } = req.body;
-    let user = await Employee.findOne({ username });
+    const { email, password } = req.body;
+    let user = await Employee.findOne({ email: email });
 
     if (!user) {
       const err = new Error("Not Found");
@@ -38,6 +38,7 @@ router.post("/login", async (req, res, next) => {
 
     res.json({
       token,
+      employeeId: user._id,
       username: user.username,
       email: user.email,
       stage: user.stage,
@@ -46,6 +47,49 @@ router.post("/login", async (req, res, next) => {
       optList: user.optList,
       isHr: user.isHr,
       feedback: user.feedback,
+      submissionDate: user.submissionDate,
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post("/register", async (req, res, next) => {
+  try {
+    console.log("Register request body:", req.body);
+    const { username, password, email, isHr } = req.body;
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = new Employee({
+      username: username,
+      password: hashedPassword,
+      email: email,
+      isHr: JSON.parse(isHr),
+    });
+    user.save();
+
+    const payload = {
+      user: {
+        id: user._id,
+      },
+    };
+
+    const token = jwt.sign(payload, process.env.JWT_SECRET, {
+      expiresIn: "30d",
+    });
+
+    res.json({
+      token,
+      employeeId: user._id,
+      username: user.username,
+      email: user.email,
+      stage: user.stage,
+      status: user.status,
+      personInfo: user.personInfo,
+      optList: user.optList,
+      isHr: user.isHr,
+      feedback: user.feedback,
+      submissionDate: user.submissionDate,
     });
   } catch (err) {
     next(err);

@@ -15,11 +15,11 @@ const employeeSchema = new mongoose.Schema({
   },
   stage: {
     type: String,
-    require: true,
+    default: "onboarding",
   },
   status: {
     type: String,
-    require: true,
+    default: "never_submit",
   },
   personInfo: {
     type: mongoose.Schema.Types.ObjectId,
@@ -36,6 +36,9 @@ const employeeSchema = new mongoose.Schema({
     default: false,
   },
   feedback: {
+    type: String,
+  },
+  submissionDate: {
     type: String,
   },
 });

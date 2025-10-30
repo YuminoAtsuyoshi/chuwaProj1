@@ -1,0 +1,239 @@
+import React, { useState, useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { getEmployeeDetails, getEmployeerInfo } from '../../api/auth';
+import { logout } from '../../store';
+import './EmployeeHomePage.css';
+
+const EmployeeHomePage = () => {
+  const [employee, setEmployee] = useState(null);
+  const [employeerInfo, setEmployeerInfo] = useState(null);
+  const [loading, setLoading] = useState(true);
+  
+  const user = useSelector(state => state.user);
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      // Check for test user data first (for testing without backend)
+      const testUser = localStorage.getItem('testUser');
+      if (testUser) {
+        try {
+          const testUserData = JSON.parse(testUser);
+          setEmployee(testUserData);
+          
+          // Mock employeer info for testing
+          const mockEmployeerInfo = {
+            first_name: 'John',
+            last_name: 'Doe',
+            middle_name: 'Michael',
+            preferred_name: 'Johnny'
+          };
+          setEmployeerInfo(mockEmployeerInfo);
+          
+          setLoading(false);
+          return;
+        } catch (error) {
+          console.error('Error parsing test user data:', error);
+        }
+      }
+      
+      if (!user?.id) return;
+      
+      try {
+        setLoading(true);
+        
+        // Fetch employee details
+        const employeeData = await getEmployeeDetails(user.id);
+        setEmployee(employeeData);
+        
+        // Try to fetch employeer info
+        try {
+          const employeerData = await getEmployeerInfo(user.id);
+          setEmployeerInfo(employeerData);
+        } catch (error) {
+          console.log('No employeer info found');
+        }
+        
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [user?.id]);
+
+  const handleLogout = () => {
+    const confirmLogout = window.confirm('Are you sure you want to log out?');
+    if (confirmLogout) {
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('testUser');
+      dispatch(logout());
+      navigate('/login', { state: { message: 'You have been logged out successfully' } });
+    }
+  };
+
+  const handlePersonalInfoClick = () => {
+    navigate('/employee/personal-info');
+  };
+
+  const handleApplicationStatusClick = () => {
+    if (employee?.stage === 'onboarding') {
+      navigate('/employee/onboarding');
+    } else {
+      // Placeholder for other stages
+      console.log('Application status for other stages - to be implemented');
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="employee-home-container">
+        <div className="loading">Loading...</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="employee-home-container">
+      {/* Navigation Bar */}
+      <nav className="employee-nav">
+        <div className="nav-brand">
+          <h2>Employee Portal</h2>
+        </div>
+        <div className="nav-links">
+          <button 
+            onClick={handlePersonalInfoClick}
+            className="nav-link"
+          >
+            Personal Information
+          </button>
+          <button 
+            className="nav-link placeholder"
+            disabled
+          >
+            Visa Status Management
+          </button>
+          <button 
+            onClick={handleLogout}
+            className="nav-link logout"
+          >
+            Logout
+          </button>
+        </div>
+      </nav>
+
+      {/* Main Content */}
+      <div className="employee-home-content">
+        <div className="welcome-section">
+          <h1>Welcome, {employeerInfo?.first_name || employee?.email || 'Employee'}!</h1>
+          <p>Manage your personal information and track your application status.</p>
+        </div>
+
+        {/* Card Modules */}
+        <div className="cards-container">
+          {/* Personal Information Card */}
+          <div className="info-card">
+            <div className="card-header">
+              <h3>Personal Information</h3>
+              <div className="card-icon">👤</div>
+            </div>
+            <div className="card-content">
+              <div className="info-item">
+                <span className="info-label">Name:</span>
+                <span className="info-value">
+                  {employeerInfo?.first_name || 'N/A'} {employeerInfo?.last_name || ''}
+                </span>
+              </div>
+              <div className="info-item">
+                <span className="info-label">Preferred Name:</span>
+                <span className="info-value">
+                  {employeerInfo?.preferred_name || 'N/A'}
+                </span>
+              </div>
+              <div className="info-item">
+                <span className="info-label">Email:</span>
+                <span className="info-value">
+                  {employee?.email || 'N/A'}
+                </span>
+              </div>
+            </div>
+            <div className="card-footer">
+              <button 
+                onClick={handlePersonalInfoClick}
+                className="card-button"
+              >
+                View Details
+              </button>
+            </div>
+          </div>
+
+          {/* Visa Status Card */}
+          <div className="info-card placeholder-card">
+            <div className="card-header">
+              <h3>Visa Status</h3>
+              <div className="card-icon">📋</div>
+            </div>
+            <div className="card-content">
+              <div className="placeholder-content">
+                <p>Visa status management will be available soon.</p>
+                <p className="placeholder-note">This feature is currently under development.</p>
+              </div>
+            </div>
+            <div className="card-footer">
+              <button 
+                className="card-button disabled"
+                disabled
+              >
+                Coming Soon
+              </button>
+            </div>
+          </div>
+
+          {/* Application Status Card */}
+          <div className="info-card">
+            <div className="card-header">
+              <h3>Application Status</h3>
+              <div className="card-icon">📊</div>
+            </div>
+            <div className="card-content">
+              <div className="info-item">
+                <span className="info-label">Current Stage:</span>
+                <span className="info-value status-value">
+                  {employee?.stage || 'N/A'}
+                </span>
+              </div>
+              <div className="info-item">
+                <span className="info-label">Status:</span>
+                <span className={`info-value status-badge status-${employee?.status || 'unknown'}`}>
+                  {employee?.status || 'N/A'}
+                </span>
+              </div>
+              {employee?.feedback && (
+                <div className="info-item">
+                  <span className="info-label">Feedback:</span>
+                  <span className="info-value feedback-text">
+                    {employee.feedback}
+                  </span>
+                </div>
+              )}
+            </div>
+            <div className="card-footer">
+              <button 
+                onClick={handleApplicationStatusClick}
+                className="card-button"
+              >
+                View Details
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default EmployeeHomePage;

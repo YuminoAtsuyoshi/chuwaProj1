@@ -41,7 +41,7 @@ const getEmployee = async (req, res, next) => {
   try {
     const employee = await Employee.findById(req.params?.employeeId, {
       password: 0,
-    });
+    }).populate("personInfo");
     if (!employee) {
       const err = new Error("Employee not found");
       err.statusCode = 404;
@@ -85,8 +85,14 @@ const getAllEmployee = async (req, res, next) => {
       searchQuery.$or = [{ username: req.query?.q }, { email: req.query?.q }];
     }
 
-    let query = await Employee.find(searchQuery, { password: 0 });
-    query = query.sort({ "personInfo.lastName": 1 }); // Sort by last name
+    // Sort by last name
+    let query = Employee.find(searchQuery, { password: 0 }).populate(
+      "personInfo"
+    );
+
+    query = query.sort({
+      "personInfo.lastName": 1,
+    });
 
     const employees = await query.skip(skip).limit(limit);
     res.status(200).json(employees);
@@ -115,7 +121,7 @@ const linkOpt = async (req, res, next) => {
       opt.employeeId,
       { $push: { optList: opt._id } },
       { new: true }
-    );
+    ).populate("personInfo");
     const { password, ...employeeWithoutPassword } = updatedEmployee;
     res.status(200).json(employeeWithoutPassword);
   } catch (err) {
@@ -143,7 +149,7 @@ const unlinkOpt = async (req, res, next) => {
       opt.employeeId,
       { $pull: { optList: opt._id } },
       { new: true }
-    );
+    ).populate("personInfo");
     const { password, ...employeeWithoutPassword } = updatedEmployee;
     res.status(200).json(employeeWithoutPassword);
   } catch (err) {
@@ -166,6 +172,7 @@ const makeDecision = async (req, res, next) => {
       employee.status = "approved";
     } else if (decision === "rejected") {
       employee.status = "rejected";
+      employee.feedback = req.body.feedback;
     } else {
       const err = new Error("Wrong decision content");
       err.statusCode = 500;
@@ -203,6 +210,8 @@ const makeAdvance = async (req, res, next) => {
       next(err);
       return;
     }
+    const currentDate = new Date();
+    employee.submissionDate = currentDate.toLocaleDateString("en-CA");
     await employee.save();
     res.status(200).json({ stage: employee.stage, status: employee.status });
   } catch (err) {

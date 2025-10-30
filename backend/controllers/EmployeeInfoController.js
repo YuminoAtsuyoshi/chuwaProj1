@@ -4,7 +4,9 @@ const Opt = require("../models/Opt.js");
 
 const getEmployeeInfo = async (req, res, next) => {
   try {
-    const employeeInfo = await EmployeeInfo.findById(req.params?.employeeId);
+    const employeeInfo = await EmployeeInfo.findOne({
+      employeeId: req.params?.employeeId,
+    });
     if (!employeeInfo) {
       const err = new Error("EmployeeInfo not found");
       err.statusCode = 404;
@@ -20,12 +22,14 @@ const getEmployeeInfo = async (req, res, next) => {
 
 const updateEmployeeInfo = async (req, res, next) => {
   try {
-    const employeeInfo = await EmployeeInfo.findById(req.params?.employeeId);
+    let employeeInfo = await EmployeeInfo.findById(req.params?.employeeId);
     if (!employeeInfo) {
-      const err = new Error("EmployeeInfo not found");
-      err.statusCode = 404;
-      next(err);
-      return;
+      employeeInfo = new EmployeeInfo({});
+      await Employee.updateOne(
+        { _id: req.params?.employeeId },
+        { personInfo: employeeInfo._id }
+      );
+      employeeInfo.employeeId = req.body.employeeId;
     }
     employeeInfo.firstName = req.body.firstName || employeeInfo.firstName;
     employeeInfo.lastName = req.body.lastName || employeeInfo.lastName;

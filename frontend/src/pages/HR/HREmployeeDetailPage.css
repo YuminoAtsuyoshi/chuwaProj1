@@ -1,0 +1,169 @@
+.hr-profile-container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+
+.loading {
+  text-align: center;
+  padding: 50px;
+  font-size: 18px;
+  color: #666;
+}
+
+.error-message,
+.no-data {
+  background: white;
+  padding: 40px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.error-message h2,
+.no-data h2 {
+  color: #dc3545;
+  margin-bottom: 15px;
+}
+
+.error-message p,
+.no-data p {
+  color: #666;
+  margin-bottom: 20px;
+}
+
+.back-btn {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.3s ease;
+}
+
+.back-btn:hover {
+  background-color: #0056b3;
+}
+
+.profile-header {
+  background: white;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  margin-bottom: 30px;
+}
+
+.header-content {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.header-content .back-btn {
+  width: fit-content;
+}
+
+.profile-header h1 {
+  color: #333;
+  margin: 0;
+  font-size: 32px;
+}
+
+/* Info Section */
+.info-section {
+  background: white;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  margin-bottom: 30px;
+}
+
+.info-section h2 {
+  color: #333;
+  margin-bottom: 25px;
+  font-size: 24px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #007bff;
+}
+
+.field-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 25px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.field.full-width {
+  grid-column: 1 / -1;
+}
+
+.field label {
+  font-weight: 600;
+  color: #555;
+  font-size: 14px;
+}
+
+.field span {
+  padding: 12px;
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  color: #333;
+  font-size: 16px;
+  word-wrap: break-word;
+}
+
+/* Status and Stage Badges */
+.status-badge,
+.stage-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.status-pending { background-color: #fff3cd; color: #856404; }
+.status-approved { background-color: #d4edda; color: #155724; }
+.status-rejected { background-color: #f8d7da; color: #721c24; }
+.status-never_submit { background-color: #e2e3e5; color: #383d41; }
+.status-unknown { background-color: #f8f9fa; color: #6c757d; }
+
+.stage-badge { background-color: #cce7ff; color: #004085; }
+
+.feedback-text {
+  font-size: 14px;
+  font-style: italic;
+  color: #555;
+  line-height: 1.5;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .hr-profile-container { padding: 10px; }
+  .profile-header { padding: 20px; }
+  .profile-header h1 { font-size: 24px; }
+  .info-section { padding: 20px; }
+  .info-section h2 { font-size: 20px; }
+  .field-grid { grid-template-columns: 1fr; gap: 20px; }
+}
+
+@media (max-width: 480px) {
+  .profile-header h1 { font-size: 20px; }
+  .info-section h2 { font-size: 18px; }
+  .field label { font-size: 13px; }
+  .field span { font-size: 14px; }
+}
+
+

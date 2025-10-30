@@ -71,7 +71,7 @@ const getOpts = async (req, res, next) => {
   }
 };
 
-const getOneOpt = async (req, res, next) => {
+const getOpt = async (req, res, next) => {
   try {
     const opt = await Opt.findById(req.params?.optId);
     if (!opt) {
@@ -104,6 +104,6 @@ const deleteOpt = async (req, res, next) => {
 module.exports = {
   createOpt,
   getOpts,
-  getOneOpt,
+  getOpt,
   deleteOpt,
 };
