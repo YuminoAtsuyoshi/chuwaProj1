@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 const ReferenceSection = ({ formData, onChange }) => {
   return (
@@ -6,64 +6,64 @@ const ReferenceSection = ({ formData, onChange }) => {
       <h3>Reference</h3>
       <div className="form-row">
         <div className="form-group">
-          <label htmlFor="reference_first_name">First Name</label>
+          <label htmlFor="referenceFirstName">First Name</label>
           <input
             type="text"
-            id="reference_first_name"
-            name="reference_first_name"
-            value={formData.reference_first_name}
+            id="referenceFirstName"
+            name="referenceFirstName"
+            value={formData.referenceFirstName}
             onChange={onChange}
           />
         </div>
         <div className="form-group">
-          <label htmlFor="reference_last_name">Last Name</label>
+          <label htmlFor="referenceLastName">Last Name</label>
           <input
             type="text"
-            id="reference_last_name"
-            name="reference_last_name"
-            value={formData.reference_last_name}
+            id="referenceLastName"
+            name="referenceLastName"
+            value={formData.referenceLastName}
             onChange={onChange}
           />
         </div>
         <div className="form-group">
-          <label htmlFor="reference_middle_name">Middle Name</label>
+          <label htmlFor="referenceMiddleName">Middle Name</label>
           <input
             type="text"
-            id="reference_middle_name"
-            name="reference_middle_name"
-            value={formData.reference_middle_name}
+            id="referenceMiddleName"
+            name="referenceMiddleName"
+            value={formData.referenceMiddleName}
             onChange={onChange}
           />
         </div>
       </div>
       <div className="form-row">
         <div className="form-group">
-          <label htmlFor="reference_phone">Phone</label>
+          <label htmlFor="referencePhone">Phone</label>
           <input
             type="tel"
-            id="reference_phone"
-            name="reference_phone"
-            value={formData.reference_phone}
+            id="referencePhone"
+            name="referencePhone"
+            value={formData.referencePhone}
             onChange={onChange}
           />
         </div>
         <div className="form-group">
-          <label htmlFor="reference_email">Email</label>
+          <label htmlFor="referenceEmail">Email</label>
           <input
             type="email"
-            id="reference_email"
-            name="reference_email"
-            value={formData.reference_email}
+            id="referenceEmail"
+            name="referenceEmail"
+            value={formData.referenceEmail}
             onChange={onChange}
           />
         </div>
         <div className="form-group">
-          <label htmlFor="reference_relationship">Relationship</label>
+          <label htmlFor="referenceRelationship">Relationship</label>
           <input
             type="text"
-            id="reference_relationship"
-            name="reference_relationship"
-            value={formData.reference_relationship}
+            id="referenceRelationship"
+            name="referenceRelationship"
+            value={formData.referenceRelationship}
             onChange={onChange}
           />
         </div>
@@ -73,5 +73,3 @@ const ReferenceSection = ({ formData, onChange }) => {
 };
 
 export default ReferenceSection;
-
-

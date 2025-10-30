@@ -1,211 +1,219 @@
-import React, { useState, useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
-import { getEmployeeDetails, getEmployeerInfo } from '../../api/auth';
-import { logout } from '../../store';
-import FileUpload from '../../components/FileUpload';
-import FilesSummary from './components/FilesSummary';
-import WorkAuthSection from './components/WorkAuthSection';
-import ReferenceSection from './components/ReferenceSection';
-import EmergencyContactsSection from './components/EmergencyContactsSection';
-import { useFileUpload } from './hooks/useFileUpload';
-import { useOnboardingForm } from './hooks/useOnboardingForm';
-import ContactInfoSection from './components/ContactInfoSection';
-import IdentitySection from './components/IdentitySection';
-import PersonalDetailsSection from './components/PersonalDetailsSection';
-import AddressSection from './components/AddressSection';
-import './OnboardingApplicationPage.css';
+import React, { useState, useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { getEmployeeDetails, getEmployeerInfo } from "../../api/auth";
+import { logout } from "../../store";
+import FileUpload from "../../components/FileUpload";
+import FilesSummary from "./components/FilesSummary";
+import WorkAuthSection from "./components/WorkAuthSection";
+import ReferenceSection from "./components/ReferenceSection";
+import EmergencyContactsSection from "./components/EmergencyContactsSection";
+import { useFileUpload } from "./hooks/useFileUpload";
+import { useOnboardingForm } from "./hooks/useOnboardingForm";
+import ContactInfoSection from "./components/ContactInfoSection";
+import IdentitySection from "./components/IdentitySection";
+import PersonalDetailsSection from "./components/PersonalDetailsSection";
+import AddressSection from "./components/AddressSection";
+import "./OnboardingApplicationPage.css";
 
 const OnboardingApplicationPage = () => {
   const [employee, setEmployee] = useState(null);
-  const [employeerInfo, setEmployeerInfo] = useState(null);
+  const [employeeInfo, setEmployeeInfo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [savingDraft, setSavingDraft] = useState(false);
-  const [message, setMessage] = useState('');
-  
+  const [message, setMessage] = useState("");
+
   // File upload state and handlers
   const {
     uploadedFiles,
+    setUploadedFiles,
     handleFileUploadSuccess,
     handleFileUploadError,
     handleDocumentDownload,
     handleDocumentPreview,
   } = useFileUpload({ setErrors, setMessage });
-  
+
   // Get user data from Redux store
-  const user = useSelector(state => state.user);
+  const user = useSelector((state) => state.user);
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  
+
   // Form state
   const [formData, setFormData] = useState({
     // Personal Details
-    first_name: '',
-    last_name: '',
-    middle_name: '',
-    preferred_name: '',
-    profile_picture: null,
-    
+    firstName: "",
+    lastName: "",
+    middleName: "",
+    preferredName: "",
+    profilePicture: null,
+
     // Address
-    address_building: '',
-    address_street: '',
-    address_city: '',
-    address_state: '',
-    address_zip: '',
-    
+    addressBuilding: "",
+    addressStreet: "",
+    addressCity: "",
+    addressState: "",
+    addressZip: "",
+
     // Contact Info
-    cell_phone: '',
-    work_phone: '',
-    email: '',
-    
+    cellPhone: "",
+    workPhone: "",
+    email: "",
+
     // Identity
-    ssn: '',
-    date_of_birth: '',
-    gender: '',
-    
+    ssn: "",
+    dateOfBirth: "",
+    gender: "",
+
     // Citizenship/Work Authorization
-    is_pr_or_citizen: '',
-    pr_or_citizen_type: '',
-    work_auth_type: '',
-    opt_receipt: null,
-    visa_title: '',
-    visa_start_date: '',
-    visa_end_date: '',
-    
+    isPrOrCitizen: "",
+    prOrCitizenType: "",
+    workAuthType: "",
+    optReceipt: null,
+    visaTitle: "",
+    visaStartDate: "",
+    visaEndDate: "",
+
     // Reference
-    reference_first_name: '',
-    reference_last_name: '',
-    reference_middle_name: '',
-    reference_phone: '',
-    reference_email: '',
-    reference_relationship: '',
-    
+    referenceFirstName: "",
+    referenceLastName: "",
+    referenceMiddleName: "",
+    referencePhone: "",
+    referenceEmail: "",
+    referenceRelationship: "",
+
     // Emergency Contacts
-    emergency_contacts: [
+    emergencyContact: [
       {
-        first_name: '',
-        last_name: '',
-        middle_name: '',
-        phone: '',
-        email: '',
-        relationship: ''
-      }
-    ]
+        firstName: "",
+        lastName: "",
+        middleName: "",
+        phone: "",
+        email: "",
+        relationship: "",
+      },
+    ],
   });
 
   useEffect(() => {
     const fetchData = async () => {
       // Check for test user data first (for testing without backend)
-      const testUser = localStorage.getItem('testUser');
+      const testUser = localStorage.getItem("testUser");
       if (testUser) {
         try {
           const testUserData = JSON.parse(testUser);
           setEmployee(testUserData);
-          setFormData(prev => ({
+          setFormData((prev) => ({
             ...prev,
-            email: testUserData.email || ''
+            email: testUserData.email || "",
           }));
-          
+
           // Handle approved status redirection
-          if (testUserData.stage === 'onboarding' && testUserData.status === 'approved') {
-            navigate('/employee/dashboard');
+          if (
+            testUserData.stage === "onboarding" &&
+            testUserData.status === "approved"
+          ) {
+            navigate("/employee/dashboard");
             return;
           }
-          
+
           setLoading(false);
           return;
         } catch (error) {
-          console.error('Error parsing test user data:', error);
+          console.error("Error parsing test user data:", error);
         }
       }
-      
-      if (!user?.id) return;
-      
+
+      if (!user?._id) return;
+
       try {
         setLoading(true);
-        
+
         // Fetch employee details
-        const employeeData = await getEmployeeDetails(user.id);
+        const employeeData = await getEmployeeDetails(user._id);
         setEmployee(employeeData);
-        
+
         // Handle approved status redirection
-        if (employeeData.stage === 'onboarding' && employeeData.status === 'approved') {
-          navigate('/employee/dashboard');
+        if (
+          employeeData.stage === "onboarding" &&
+          employeeData.status === "approved"
+        ) {
+          navigate("/employee/dashboard");
           return;
         }
-        
+
         // Pre-fill email from employee data
-        setFormData(prev => ({
+        setFormData((prev) => ({
           ...prev,
-          email: employeeData.email || ''
+          email: employeeData.email || "",
         }));
-        
+
         // Try to fetch existing employeer info
         try {
-          const employeerData = await getEmployeerInfo(user.id);
-          setEmployeerInfo(employeerData);
-          
+          const employeeData = await getEmployeerInfo(user._id);
+          setEmployeeInfo(employeeData);
+
           // Pre-fill form with existing data
-          if (employeerData) {
-            setFormData(prev => ({
+          if (employeeData) {
+            setFormData((prev) => ({
               ...prev,
-              ...employeerData,
+              ...employeeData,
               // Handle emergency contacts array
-              emergency_contacts: employeerData.emergency_contacts || [{
-                first_name: '',
-                last_name: '',
-                middle_name: '',
-                phone: '',
-                email: '',
-                relationship: ''
-              }]
+              emergencyContacts: employeeData.emergencyContacts || [
+                {
+                  firstName: "",
+                  lastName: "",
+                  middleName: "",
+                  phone: "",
+                  email: "",
+                  relationship: "",
+                },
+              ],
             }));
-            
+
             // Set uploaded file IDs for document management
-            setUploadedFiles(prev => ({
+            setUploadedFiles((prev) => ({
               ...prev,
-              profilePictureDocId: employeerData.profile_picture_ref,
-              driverLicenseDocId: employeerData.driver_license_ref,
-              optReceiptDocId: employeerData.opt_receipt_upload_ref
+              profilePictureDocId: employeeData.profilePicture,
+              driverLicenseDocId: employeeData.driverLicense,
+              optReceiptDocId: employeeData.optReceiptUpload,
             }));
           }
         } catch (error) {
           // No existing employeer info found, that's okay
-          console.log('No existing employeer info found');
+          console.log("No existing employeer info found");
         }
-        
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error("Error fetching data:", error);
       } finally {
         setLoading(false);
       }
     };
 
     fetchData();
-  }, [user?.id, navigate]);
+  }, [user?._id, navigate]);
 
   const handleInputChange = (e) => {
     const { name, value, type, files } = e.target;
-    
-    if (type === 'file') {
-      setFormData(prev => ({
+
+    if (type === "file") {
+      setFormData((prev) => ({
         ...prev,
-        [name]: files[0] || null
+        [name]: files[0] || null,
       }));
     } else {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        [name]: value
+        [name]: value,
       }));
     }
-    
+
     // Clear error when user starts typing
     if (errors[name]) {
-      setErrors(prev => ({
+      setErrors((prev) => ({
         ...prev,
-        [name]: ''
+        [name]: "",
       }));
     }
   };
@@ -213,77 +221,95 @@ const OnboardingApplicationPage = () => {
   // File upload handlers moved to useFileUpload hook
 
   const handleEmergencyContactChange = (index, field, value) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      emergency_contacts: prev.emergency_contacts.map((contact, i) => 
+      emergencyContact: prev.emergencyContact.map((contact, i) =>
         i === index ? { ...contact, [field]: value } : contact
-      )
+      ),
     }));
   };
 
   const addEmergencyContact = () => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      emergency_contacts: [
-        ...prev.emergency_contacts,
+      emergencyContact: [
+        ...prev.emergencyContact,
         {
-          first_name: '',
-          last_name: '',
-          middle_name: '',
-          phone: '',
-          email: '',
-          relationship: ''
-        }
-      ]
+          firstName: "",
+          lastName: "",
+          middleName: "",
+          phone: "",
+          email: "",
+          relationship: "",
+        },
+      ],
     }));
   };
 
   const removeEmergencyContact = (index) => {
-    if (formData.emergency_contacts.length > 1) {
-      setFormData(prev => ({
+    if (formData.emergencyContact.length > 1) {
+      setFormData((prev) => ({
         ...prev,
-        emergency_contacts: prev.emergency_contacts.filter((_, i) => i !== index)
+        emergencyContacts: prev.emergencyContact.filter((_, i) => i !== index),
       }));
     }
   };
 
   const validateForm = () => {
     const newErrors = {};
-    
+
     // Required fields validation
     const requiredFields = [
-      'first_name', 'last_name', 'address_building', 'address_street',
-      'address_city', 'address_state', 'address_zip', 'cell_phone',
-      'ssn', 'date_of_birth', 'gender'
+      "firstName",
+      "lastName",
+      "addressBuilding",
+      "addressStreet",
+      "addressCity",
+      "addressState",
+      "addressZip",
+      "cellPhone",
+      "ssn",
+      "dateOfBirth",
+      "gender",
     ];
-    
-    requiredFields.forEach(field => {
+
+    requiredFields.forEach((field) => {
       if (!formData[field]) {
-        newErrors[field] = `${field.replace('_', ' ')} is required`;
+        newErrors[field] = `${field.replace("_", " ")} is required`;
       }
     });
-    
+
     // Citizenship/Work Authorization validation
-    if (!formData.is_pr_or_citizen) {
-      newErrors.is_pr_or_citizen = 'Please specify citizenship status';
-    } else if (formData.is_pr_or_citizen === 'yes' && !formData.pr_or_citizen_type) {
-      newErrors.pr_or_citizen_type = 'Please specify citizenship type';
-    } else if (formData.is_pr_or_citizen === 'no' && !formData.work_auth_type) {
-      newErrors.work_auth_type = 'Please specify work authorization type';
+    if (!formData.isPrOrCitizen) {
+      newErrors.isPrOrCitizen = "Please specify citizenship status";
+    } else if (formData.isPrOrCitizen === "yes" && !formData.prOrCitizenType) {
+      newErrors.prOrCitizenType = "Please specify citizenship type";
+    } else if (formData.isPrOrCitizen === "no" && !formData.workAuthType) {
+      newErrors.workAuthType = "Please specify work authorization type";
     }
-    
+
     // File upload validation
-    if (formData.work_auth_type === 'F1(CPT/OPT)' && !uploadedFiles.optReceiptDocId) {
-      newErrors.optReceiptDocId = 'OPT Receipt is required for F1(CPT/OPT) work authorization';
+    if (
+      formData.workAuthType === "F1(CPT/OPT)" &&
+      !uploadedFiles.optReceiptDocId
+    ) {
+      newErrors.optReceiptDocId =
+        "OPT Receipt is required for F1(CPT/OPT) work authorization";
     }
-    
+
     // Emergency contacts validation
-    formData.emergency_contacts.forEach((contact, index) => {
-      if (!contact.first_name || !contact.last_name || !contact.phone || !contact.relationship) {
-        newErrors[`emergency_contact_${index}`] = 'Emergency contact must have first name, last name, phone, and relationship';
+    formData.emergencyContact.forEach((contact, index) => {
+      if (
+        !contact.firstName ||
+        !contact.lastName ||
+        !contact.phone ||
+        !contact.relationship
+      ) {
+        newErrors[`emergency_contact_${index}`] =
+          "Emergency contact must have first name, last name, phone, and relationship";
       }
     });
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -308,16 +334,20 @@ const OnboardingApplicationPage = () => {
   }
 
   // Check user access and determine UI state
-  const isOnboardingStage = employee?.stage === 'onboarding';
-  const canEditForm = isOnboardingStage && (employee?.status === 'never_submit' || employee?.status === 'rejected');
-  const isPendingState = isOnboardingStage && employee?.status === 'pending';
+  const isOnboardingStage = employee?.stage === "onboarding";
+  const canEditForm =
+    isOnboardingStage &&
+    (employee?.status === "never_submit" || employee?.status === "rejected");
+  const isPendingState = isOnboardingStage && employee?.status === "pending";
 
   if (!isOnboardingStage) {
     return (
       <div className="onboarding-container">
         <div className="access-denied">
           <h2>Access Denied</h2>
-          <p>You don't have access to the onboarding application at this time.</p>
+          <p>
+            You don't have access to the onboarding application at this time.
+          </p>
         </div>
       </div>
     );
@@ -331,7 +361,9 @@ const OnboardingApplicationPage = () => {
           <h1>Employee Onboarding Application</h1>
           <div className="pending-message">
             <h2>Please wait for HR to review your application.</h2>
-            <p>Your application has been submitted and is currently under review.</p>
+            <p>
+              Your application has been submitted and is currently under review.
+            </p>
           </div>
         </div>
 
@@ -342,19 +374,19 @@ const OnboardingApplicationPage = () => {
             <div className="readonly-field-group">
               <div className="readonly-field">
                 <label>First Name:</label>
-                <span>{formData.first_name}</span>
+                <span>{formData.firstName}</span>
               </div>
               <div className="readonly-field">
                 <label>Last Name:</label>
-                <span>{formData.last_name}</span>
+                <span>{formData.lastName}</span>
               </div>
               <div className="readonly-field">
                 <label>Middle Name:</label>
-                <span>{formData.middle_name || 'N/A'}</span>
+                <span>{formData.middleName || "N/A"}</span>
               </div>
               <div className="readonly-field">
                 <label>Preferred Name:</label>
-                <span>{formData.preferred_name || 'N/A'}</span>
+                <span>{formData.preferredName || "N/A"}</span>
               </div>
             </div>
           </div>
@@ -364,23 +396,23 @@ const OnboardingApplicationPage = () => {
             <div className="readonly-field-group">
               <div className="readonly-field">
                 <label>Building/Apartment:</label>
-                <span>{formData.address_building}</span>
+                <span>{formData.addressBuilding}</span>
               </div>
               <div className="readonly-field">
                 <label>Street Address:</label>
-                <span>{formData.address_street}</span>
+                <span>{formData.addressStreet}</span>
               </div>
               <div className="readonly-field">
                 <label>City:</label>
-                <span>{formData.address_city}</span>
+                <span>{formData.addressCity}</span>
               </div>
               <div className="readonly-field">
                 <label>State:</label>
-                <span>{formData.address_state}</span>
+                <span>{formData.addressState}</span>
               </div>
               <div className="readonly-field">
                 <label>ZIP Code:</label>
-                <span>{formData.address_zip}</span>
+                <span>{formData.addressZip}</span>
               </div>
             </div>
           </div>
@@ -390,11 +422,11 @@ const OnboardingApplicationPage = () => {
             <div className="readonly-field-group">
               <div className="readonly-field">
                 <label>Cell Phone:</label>
-                <span>{formData.cell_phone}</span>
+                <span>{formData.cellPhone}</span>
               </div>
               <div className="readonly-field">
                 <label>Work Phone:</label>
-                <span>{formData.work_phone || 'N/A'}</span>
+                <span>{formData.workPhone || "N/A"}</span>
               </div>
               <div className="readonly-field">
                 <label>Email:</label>
@@ -412,7 +444,7 @@ const OnboardingApplicationPage = () => {
               </div>
               <div className="readonly-field">
                 <label>Date of Birth:</label>
-                <span>{formData.date_of_birth}</span>
+                <span>{formData.dateOfBirth}</span>
               </div>
               <div className="readonly-field">
                 <label>Gender:</label>
@@ -426,25 +458,25 @@ const OnboardingApplicationPage = () => {
             <div className="readonly-field-group">
               <div className="readonly-field">
                 <label>Permanent resident or citizen of the U.S.:</label>
-                <span>{formData.is_pr_or_citizen === 'yes' ? 'Yes' : 'No'}</span>
+                <span>{formData.isPrOrCitizen === "yes" ? "Yes" : "No"}</span>
               </div>
-              {formData.is_pr_or_citizen === 'yes' && (
+              {formData.isPrOrCitizen === "yes" && (
                 <div className="readonly-field">
                   <label>Citizenship Type:</label>
-                  <span>{formData.pr_or_citizen_type}</span>
+                  <span>{formData.prOrCitizenType}</span>
                 </div>
               )}
-              {formData.is_pr_or_citizen === 'no' && (
+              {formData.isPrOrCitizen === "no" && (
                 <div className="readonly-field">
                   <label>Work Authorization Type:</label>
-                  <span>{formData.work_auth_type}</span>
+                  <span>{formData.workAuthType}</span>
                 </div>
               )}
             </div>
           </div>
 
           {/* Document Management Section */}
-          <FilesSummary 
+          <FilesSummary
             uploadedFiles={uploadedFiles}
             onPreview={handleDocumentPreview}
             onDownload={handleDocumentDownload}
@@ -460,7 +492,9 @@ const OnboardingApplicationPage = () => {
       <div className="onboarding-container">
         <div className="access-denied">
           <h2>Access Denied</h2>
-          <p>You don't have access to the onboarding application at this time.</p>
+          <p>
+            You don't have access to the onboarding application at this time.
+          </p>
         </div>
       </div>
     );
@@ -470,11 +504,14 @@ const OnboardingApplicationPage = () => {
     <div className="onboarding-container">
       <div className="onboarding-header">
         <h1>Employee Onboarding Application</h1>
-        <p>Please complete all required information to proceed with your onboarding.</p>
+        <p>
+          Please complete all required information to proceed with your
+          onboarding.
+        </p>
       </div>
 
       {/* HR Feedback for rejected status */}
-      {employee?.status === 'rejected' && employee?.feedback && (
+      {employee?.status === "rejected" && employee?.feedback && (
         <div className="feedback-alert">
           <h3>HR Feedback</h3>
           <p>{employee.feedback}</p>
@@ -483,36 +520,40 @@ const OnboardingApplicationPage = () => {
 
       <form onSubmit={handleSubmit} className="onboarding-form">
         {/* Personal Details Section */}
-        <PersonalDetailsSection 
+        <PersonalDetailsSection
           formData={formData}
           errors={errors}
-                onChange={handleInputChange}
+          onChange={handleInputChange}
           onUploadSuccess={handleFileUploadSuccess}
           onUploadError={handleFileUploadError}
         />
 
         {/* Address Section */}
-        <AddressSection formData={formData} errors={errors} onChange={handleInputChange} />
-
-        <ContactInfoSection 
+        <AddressSection
           formData={formData}
           errors={errors}
-                onChange={handleInputChange}
+          onChange={handleInputChange}
+        />
+
+        <ContactInfoSection
+          formData={formData}
+          errors={errors}
+          onChange={handleInputChange}
           onUploadSuccess={handleFileUploadSuccess}
           onUploadError={handleFileUploadError}
         />
 
-        <IdentitySection 
+        <IdentitySection
           formData={formData}
           errors={errors}
-                onChange={handleInputChange}
+          onChange={handleInputChange}
         />
 
         {/* Citizenship/Work Authorization Section */}
-        <WorkAuthSection 
+        <WorkAuthSection
           formData={formData}
           errors={errors}
-                  onChange={handleInputChange}
+          onChange={handleInputChange}
           onUploadSuccess={handleFileUploadSuccess}
           onUploadError={handleFileUploadError}
         />
@@ -521,8 +562,8 @@ const OnboardingApplicationPage = () => {
         <ReferenceSection formData={formData} onChange={handleInputChange} />
 
         {/* Emergency Contacts Section */}
-        <EmergencyContactsSection 
-          contacts={formData.emergency_contacts}
+        <EmergencyContactsSection
+          contacts={formData.emergencyContact}
           errors={errors}
           onChange={handleEmergencyContactChange}
           onAdd={addEmergencyContact}
@@ -532,27 +573,31 @@ const OnboardingApplicationPage = () => {
         {/* Submit Button */}
         <div className="form-section">
           {message && (
-            <div className={`message ${message.includes('successful') ? 'success' : 'error'}`}>
+            <div
+              className={`message ${
+                message.includes("successful") ? "success" : "error"
+              }`}
+            >
               {message}
             </div>
           )}
-          
+
           <div className="button-group">
-            <button 
-              type="button" 
+            <button
+              type="button"
               onClick={handleSaveDraft}
               className="save-draft-btn"
               disabled={savingDraft || submitting}
             >
-              {savingDraft ? 'Saving Draft...' : 'Save Draft'}
+              {savingDraft ? "Saving Draft..." : "Save Draft"}
             </button>
-            
-            <button 
-              type="submit" 
+
+            <button
+              type="submit"
               className="submit-btn"
               disabled={submitting || savingDraft}
             >
-              {submitting ? 'Submitting...' : 'Submit Application'}
+              {submitting ? "Submitting..." : "Submit Application"}
             </button>
           </div>
         </div>

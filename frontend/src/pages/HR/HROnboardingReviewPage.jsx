@@ -101,10 +101,10 @@ const HROnboardingReviewPage = () => {
   const getWorkAuthTitle = () => {
     if (!employeeInfo) return "N/A";
 
-    if (employeeInfo.is_pr_or_citizen === "yes") {
-      return employeeInfo.pr_or_citizen_type || "Citizen/Permanent Resident";
-    } else if (employeeInfo.is_pr_or_citizen === "no") {
-      return employeeInfo.work_auth_type || "N/A";
+    if (employeeInfo.isPrOrCitizen === "yes") {
+      return employeeInfo.prOrCitizenType || "Citizen/Permanent Resident";
+    } else if (employeeInfo.isPrOrCitizen === "no") {
+      return employeeInfo.workAuthType || "N/A";
     }
 
     return "N/A";

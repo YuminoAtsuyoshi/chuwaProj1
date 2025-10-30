@@ -1,30 +1,38 @@
-import React from 'react';
-import FileUpload from '../../../components/FileUpload';
+import React from "react";
+import FileUpload from "../../../components/FileUpload";
 
-const ContactInfoSection = ({ formData, errors, onChange, onUploadSuccess, onUploadError }) => {
+const ContactInfoSection = ({
+  formData,
+  errors,
+  onChange,
+  onUploadSuccess,
+  onUploadError,
+}) => {
   return (
     <div className="form-section">
       <h3>Contact Information</h3>
       <div className="form-row">
         <div className="form-group">
-          <label htmlFor="cell_phone">Cell Phone *</label>
+          <label htmlFor="cellPhone">Cell Phone *</label>
           <input
             type="tel"
-            id="cell_phone"
-            name="cell_phone"
-            value={formData.cell_phone}
+            id="cellPhone"
+            name="cellPhone"
+            value={formData.cellPhone}
             onChange={onChange}
-            className={errors.cell_phone ? 'error' : ''}
+            className={errors.cellPhone ? "error" : ""}
           />
-          {errors.cell_phone && <span className="error-message">{errors.cell_phone}</span>}
+          {errors.cellPhone && (
+            <span className="error-message">{errors.cellPhone}</span>
+          )}
         </div>
         <div className="form-group">
-          <label htmlFor="work_phone">Work Phone</label>
+          <label htmlFor="workPhone">Work Phone</label>
           <input
             type="tel"
-            id="work_phone"
-            name="work_phone"
-            value={formData.work_phone}
+            id="workPhone"
+            name="workPhone"
+            value={formData.workPhone}
             onChange={onChange}
           />
         </div>
@@ -47,15 +55,17 @@ const ContactInfoSection = ({ formData, errors, onChange, onUploadSuccess, onUpl
         name="driver_license"
         accept="image/*,.pdf"
         fileType="driverLicenseDocId"
-        onUploadSuccess={(docId, docUrl) => onUploadSuccess('driverLicenseDocId', docId, docUrl)}
-        onUploadError={(error) => onUploadError('driverLicenseDocId', error)}
-        className={errors.driverLicenseDocId ? 'error' : ''}
+        onUploadSuccess={(docId, docUrl) =>
+          onUploadSuccess("driverLicenseDocId", docId, docUrl)
+        }
+        onUploadError={(error) => onUploadError("driverLicenseDocId", error)}
+        className={errors.driverLicenseDocId ? "error" : ""}
       />
-      {errors.driverLicenseDocId && <span className="error-message">{errors.driverLicenseDocId}</span>}
+      {errors.driverLicenseDocId && (
+        <span className="error-message">{errors.driverLicenseDocId}</span>
+      )}
     </div>
   );
 };
 
 export default ContactInfoSection;
-
-

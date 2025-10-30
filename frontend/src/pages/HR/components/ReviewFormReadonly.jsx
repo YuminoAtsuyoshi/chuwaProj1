@@ -97,20 +97,34 @@ const ReviewFormReadonly = ({ employeeInfo, getWorkAuthTitle }) => {
         <h2>Citizenship/Work Authorization</h2>
         <div className="field-grid">
           <div className="field">
-            <label>Work Authorization Type:</label>
-            <span>{employeeInfo.Visa}</span>
+            <label>Permanent resident or citizen of the U.S.:</label>
+            <span>{employeeInfo.isPrOrCitizen === "yes" ? "Yes" : "No"}</span>
           </div>
-          {employeeInfo.workAuthStart && (
+          {employeeInfo.isPrOrCitizen === "yes" && (
             <div className="field">
-              <label>Work Auth Start Date:</label>
-              <span>{employeeInfo.workAuthStart || "N/A"}</span>
+              <label>Citizenship Type:</label>
+              <span>{employeeInfo.prOrCitizenType || "N/A"}</span>
             </div>
           )}
-          {employeeInfo.workAuthEnd && (
-            <div className="field">
-              <label>Work Auth End Date:</label>
-              <span>{employeeInfo.workAuthEnd || "N/A"}</span>
-            </div>
+          {employeeInfo.isPrOrCitizen === "no" && (
+            <>
+              <div className="field">
+                <label>Work Authorization Type:</label>
+                <span>{getWorkAuthTitle()}</span>
+              </div>
+              {employeeInfo.workAuthStart && (
+                <div className="field">
+                  <label>Work Auth Start Date:</label>
+                  <span>{employeeInfo.workAuthStart}</span>
+                </div>
+              )}
+              {employeeInfo.workAuthEnd && (
+                <div className="field">
+                  <label>Work Auth End Date:</label>
+                  <span>{employeeInfo.workAuthEnd}</span>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>

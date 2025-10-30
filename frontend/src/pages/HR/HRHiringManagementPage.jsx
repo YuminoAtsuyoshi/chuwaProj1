@@ -232,9 +232,9 @@ const HRHiringManagementPage = () => {
   const getFullName = (emp) => {
     if (emp.employeerInfo) {
       const parts = [
-        emp.employeerInfo.first_name,
-        emp.employeerInfo.middle_name,
-        emp.employeerInfo.last_name,
+        emp.employeerInfo.firstName,
+        emp.employeerInfo.middleName,
+        emp.employeerInfo.lastName,
       ].filter(Boolean);
       return parts.join(" ");
     }

@@ -113,10 +113,10 @@ const HREmployeeDetailPage = () => {
 
   const getWorkAuthTitle = () => {
     if (!employeeInfo) return "N/A";
-    if (employeeInfo.is_pr_or_citizen === "yes")
-      return employeeInfo.pr_or_citizen_type || "Citizen/Permanent Resident";
-    if (employeeInfo.is_pr_or_citizen === "no")
-      return employeeInfo.work_auth_type || "N/A";
+    if (employeeInfo.isPrOrCitizen === "yes")
+      return employeeInfo.prOrCitizenType || "Citizen/Permanent Resident";
+    if (employeeInfo.isPrOrCitizen === "no")
+      return employeeInfo.workAuthType || "N/A";
     return "N/A";
   };
 
@@ -175,7 +175,7 @@ const HREmployeeDetailPage = () => {
               </div>
               <div className="field">
                 <label>Work Authorization Title:</label>
-                <span>{employeeInfo.visa || "N/A"}</span>
+                <span>{getWorkAuthTitle()}</span>
               </div>
             </div>
           </div>

@@ -168,12 +168,11 @@ const HREmployeeListPage = () => {
       : emp.username || "N/A";
   const getWorkAuthTitle = (emp) => {
     if (!emp.employeeInfo) return "N/A";
-    const { is_pr_or_citizen, pr_or_citizen_type, work_auth_type } =
-      emp.employeeInfo;
-    return is_pr_or_citizen === "yes"
-      ? pr_or_citizen_type || "Citizen/Permanent Resident"
-      : is_pr_or_citizen === "no"
-      ? work_auth_type || "N/A"
+    const { isPrOrCitizen, prOrCitizenType, workAuthType } = emp.employeeInfo;
+    return isPrOrCitizen === "yes"
+      ? prOrCitizenType || "Citizen/Permanent Resident"
+      : isPrOrCitizen === "no"
+      ? workAuthType || "N/A"
       : "N/A";
   };
 
@@ -242,7 +241,7 @@ const HREmployeeListPage = () => {
                     </button>
                   </td>
                   <td>{emp.personInfo?.ssn || "N/A"}</td>
-                  <td>{emp.personInfo?.visa}</td>
+                  <td>{getWorkAuthTitle(emp)}</td>
                   <td>{emp.personInfo?.cellPhone || "N/A"}</td>
                   <td>{emp.email || "N/A"}</td>
                 </tr>

@@ -1,55 +1,65 @@
-import React from 'react';
-import FileUpload from '../../../components/FileUpload';
+import React from "react";
+import FileUpload from "../../../components/FileUpload";
 
-const PersonalDetailsSection = ({ formData, errors, onChange, onUploadSuccess, onUploadError }) => {
+const PersonalDetailsSection = ({
+  formData,
+  errors,
+  onChange,
+  onUploadSuccess,
+  onUploadError,
+}) => {
   return (
     <div className="form-section">
       <h3>Personal Details</h3>
       <div className="form-row">
         <div className="form-group">
-          <label htmlFor="first_name">First Name *</label>
+          <label htmlFor="firstName">First Name *</label>
           <input
             type="text"
-            id="first_name"
-            name="first_name"
-            value={formData.first_name}
+            id="firstName"
+            name="firstName"
+            value={formData.firstName}
             onChange={onChange}
-            className={errors.first_name ? 'error' : ''}
+            className={errors.firstName ? "error" : ""}
           />
-          {errors.first_name && <span className="error-message">{errors.first_name}</span>}
+          {errors.first_name && (
+            <span className="error-message">{errors.firstName}</span>
+          )}
         </div>
         <div className="form-group">
-          <label htmlFor="last_name">Last Name *</label>
+          <label htmlFor="lastName">Last Name *</label>
           <input
             type="text"
-            id="last_name"
-            name="last_name"
-            value={formData.last_name}
+            id="lastName"
+            name="lastName"
+            value={formData.lastName}
             onChange={onChange}
-            className={errors.last_name ? 'error' : ''}
+            className={errors.lastName ? "error" : ""}
           />
-          {errors.last_name && <span className="error-message">{errors.last_name}</span>}
+          {errors.lastName && (
+            <span className="error-message">{errors.lastName}</span>
+          )}
         </div>
       </div>
 
       <div className="form-row">
         <div className="form-group">
-          <label htmlFor="middle_name">Middle Name</label>
+          <label htmlFor="middleName">Middle Name</label>
           <input
             type="text"
-            id="middle_name"
-            name="middle_name"
-            value={formData.middle_name}
+            id="middleName"
+            name="middleName"
+            value={formData.middleName}
             onChange={onChange}
           />
         </div>
         <div className="form-group">
-          <label htmlFor="preferred_name">Preferred Name</label>
+          <label htmlFor="preferredName">Preferred Name</label>
           <input
             type="text"
-            id="preferred_name"
-            name="preferred_name"
-            value={formData.preferred_name}
+            id="preferredName"
+            name="preferredName"
+            value={formData.preferredName}
             onChange={onChange}
           />
         </div>
@@ -57,18 +67,20 @@ const PersonalDetailsSection = ({ formData, errors, onChange, onUploadSuccess, o
 
       <FileUpload
         label="Profile Picture"
-        name="profile_picture"
+        name="profilePicture"
         accept="image/*"
         fileType="profilePictureDocId"
-        onUploadSuccess={(docId, docUrl) => onUploadSuccess('profilePictureDocId', docId, docUrl)}
-        onUploadError={(error) => onUploadError('profilePictureDocId', error)}
-        className={errors.profilePictureDocId ? 'error' : ''}
+        onUploadSuccess={(docId, docUrl) =>
+          onUploadSuccess("profilePictureDocId", docId, docUrl)
+        }
+        onUploadError={(error) => onUploadError("profilePictureDocId", error)}
+        className={errors.profilePictureDocId ? "error" : ""}
       />
-      {errors.profilePictureDocId && <span className="error-message">{errors.profilePictureDocId}</span>}
+      {errors.profilePictureDocId && (
+        <span className="error-message">{errors.profilePictureDocId}</span>
+      )}
     </div>
   );
 };
 
 export default PersonalDetailsSection;
-
-

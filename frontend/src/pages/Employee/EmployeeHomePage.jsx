@@ -1,91 +1,92 @@
-import React, { useState, useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
-import { getEmployeeDetails, getEmployeerInfo } from '../../api/auth';
-import { logout } from '../../store';
-import './EmployeeHomePage.css';
+import React, { useState, useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { getEmployeeDetails, getEmployeerInfo } from "../../api/auth";
+import { logout } from "../../store";
+import "./EmployeeHomePage.css";
 
 const EmployeeHomePage = () => {
   const [employee, setEmployee] = useState(null);
-  const [employeerInfo, setEmployeerInfo] = useState(null);
+  const [employeeInfo, setEmployeeInfo] = useState(null);
   const [loading, setLoading] = useState(true);
-  
-  const user = useSelector(state => state.user);
+
+  const user = useSelector((state) => state.user);
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
   useEffect(() => {
     const fetchData = async () => {
       // Check for test user data first (for testing without backend)
-      const testUser = localStorage.getItem('testUser');
+      const testUser = localStorage.getItem("testUser");
       if (testUser) {
         try {
           const testUserData = JSON.parse(testUser);
           setEmployee(testUserData);
-          
+
           // Mock employeer info for testing
           const mockEmployeerInfo = {
-            first_name: 'John',
-            last_name: 'Doe',
-            middle_name: 'Michael',
-            preferred_name: 'Johnny'
+            first_name: "John",
+            last_name: "Doe",
+            middle_name: "Michael",
+            preferred_name: "Johnny",
           };
           setEmployeerInfo(mockEmployeerInfo);
-          
+
           setLoading(false);
           return;
         } catch (error) {
-          console.error('Error parsing test user data:', error);
+          console.error("Error parsing test user data:", error);
         }
       }
-      
-      if (!user?.id) return;
-      
+
+      if (!user?._id) return;
+
       try {
         setLoading(true);
-        
+
         // Fetch employee details
-        const employeeData = await getEmployeeDetails(user.id);
+        const employeeData = await getEmployeeDetails(user._id);
         setEmployee(employeeData);
-        
+
         // Try to fetch employeer info
         try {
-          const employeerData = await getEmployeerInfo(user.id);
-          setEmployeerInfo(employeerData);
+          const employeerData = await getEmployeerInfo(user._id);
+          setEmployeeInfo(employeerData);
         } catch (error) {
-          console.log('No employeer info found');
+          console.log("No employeer info found");
         }
-        
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error("Error fetching data:", error);
       } finally {
         setLoading(false);
       }
     };
 
     fetchData();
-  }, [user?.id]);
+  }, [user?._id]);
 
   const handleLogout = () => {
-    const confirmLogout = window.confirm('Are you sure you want to log out?');
+    const confirmLogout = window.confirm("Are you sure you want to log out?");
     if (confirmLogout) {
-      localStorage.removeItem('authToken');
-      localStorage.removeItem('testUser');
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("testUser");
       dispatch(logout());
-      navigate('/login', { state: { message: 'You have been logged out successfully' } });
+      navigate("/login", {
+        state: { message: "You have been logged out successfully" },
+      });
     }
   };
 
   const handlePersonalInfoClick = () => {
-    navigate('/employee/personal-info');
+    navigate("/employee/personal-info");
   };
 
   const handleApplicationStatusClick = () => {
-    if (employee?.stage === 'onboarding') {
-      navigate('/employee/onboarding');
+    if (employee?.stage === "onboarding") {
+      navigate("/employee/onboarding");
     } else {
       // Placeholder for other stages
-      console.log('Application status for other stages - to be implemented');
+      console.log("Application status for other stages - to be implemented");
     }
   };
 
@@ -105,22 +106,13 @@ const EmployeeHomePage = () => {
           <h2>Employee Portal</h2>
         </div>
         <div className="nav-links">
-          <button 
-            onClick={handlePersonalInfoClick}
-            className="nav-link"
-          >
+          <button onClick={handlePersonalInfoClick} className="nav-link">
             Personal Information
           </button>
-          <button 
-            className="nav-link placeholder"
-            disabled
-          >
+          <button className="nav-link placeholder" disabled>
             Visa Status Management
           </button>
-          <button 
-            onClick={handleLogout}
-            className="nav-link logout"
-          >
+          <button onClick={handleLogout} className="nav-link logout">
             Logout
           </button>
         </div>
@@ -129,8 +121,12 @@ const EmployeeHomePage = () => {
       {/* Main Content */}
       <div className="employee-home-content">
         <div className="welcome-section">
-          <h1>Welcome, {employeerInfo?.first_name || employee?.email || 'Employee'}!</h1>
-          <p>Manage your personal information and track your application status.</p>
+          <h1>
+            Welcome, {employeeInfo?.firstName || employee?.email || "Employee"}!
+          </h1>
+          <p>
+            Manage your personal information and track your application status.
+          </p>
         </div>
 
         {/* Card Modules */}
@@ -145,27 +141,23 @@ const EmployeeHomePage = () => {
               <div className="info-item">
                 <span className="info-label">Name:</span>
                 <span className="info-value">
-                  {employeerInfo?.first_name || 'N/A'} {employeerInfo?.last_name || ''}
+                  {employeeInfo?.firstName || "N/A"}{" "}
+                  {employeeInfo?.lastName || ""}
                 </span>
               </div>
               <div className="info-item">
                 <span className="info-label">Preferred Name:</span>
                 <span className="info-value">
-                  {employeerInfo?.preferred_name || 'N/A'}
+                  {employeeInfo?.preferredName || "N/A"}
                 </span>
               </div>
               <div className="info-item">
                 <span className="info-label">Email:</span>
-                <span className="info-value">
-                  {employee?.email || 'N/A'}
-                </span>
+                <span className="info-value">{employee?.email || "N/A"}</span>
               </div>
             </div>
             <div className="card-footer">
-              <button 
-                onClick={handlePersonalInfoClick}
-                className="card-button"
-              >
+              <button onClick={handlePersonalInfoClick} className="card-button">
                 View Details
               </button>
             </div>
@@ -180,14 +172,13 @@ const EmployeeHomePage = () => {
             <div className="card-content">
               <div className="placeholder-content">
                 <p>Visa status management will be available soon.</p>
-                <p className="placeholder-note">This feature is currently under development.</p>
+                <p className="placeholder-note">
+                  This feature is currently under development.
+                </p>
               </div>
             </div>
             <div className="card-footer">
-              <button 
-                className="card-button disabled"
-                disabled
-              >
+              <button className="card-button disabled" disabled>
                 Coming Soon
               </button>
             </div>
@@ -203,13 +194,17 @@ const EmployeeHomePage = () => {
               <div className="info-item">
                 <span className="info-label">Current Stage:</span>
                 <span className="info-value status-value">
-                  {employee?.stage || 'N/A'}
+                  {employee?.stage || "N/A"}
                 </span>
               </div>
               <div className="info-item">
                 <span className="info-label">Status:</span>
-                <span className={`info-value status-badge status-${employee?.status || 'unknown'}`}>
-                  {employee?.status || 'N/A'}
+                <span
+                  className={`info-value status-badge status-${
+                    employee?.status || "unknown"
+                  }`}
+                >
+                  {employee?.status || "N/A"}
                 </span>
               </div>
               {employee?.feedback && (
@@ -222,7 +217,7 @@ const EmployeeHomePage = () => {
               )}
             </div>
             <div className="card-footer">
-              <button 
+              <button
                 onClick={handleApplicationStatusClick}
                 className="card-button"
               >

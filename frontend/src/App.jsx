@@ -6,7 +6,8 @@ import {
   Navigate,
 } from "react-router-dom";
 import { Provider } from "react-redux";
-import store from "./store";
+import { persistor, store } from "./store";
+import { PersistGate } from "redux-persist/integration/react";
 import LoginPage from "./pages/Auth/LoginPage";
 import RegistrationPage from "./pages/Auth/RegistrationPage";
 import EmployeeDashboard from "./pages/Employee/EmployeeDashboard";
@@ -25,79 +26,81 @@ import "./App.css";
 function App() {
   return (
     <Provider store={store}>
-      <Router>
-        <div className="App">
-          <Routes>
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegistrationPage />} />
-            <Route
-              path="/employee/dashboard"
-              element={
-                <ProtectedRoute>
-                  <EmployeeHomePage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/employee/onboarding"
-              element={
-                <ProtectedRoute>
-                  <OnboardingApplicationPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/employee/personal-info"
-              element={
-                <ProtectedRoute>
-                  <PersonalInformationPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/hr/dashboard"
-              element={
-                <ProtectedRoute>
-                  <HRDashboardPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/hr/employee-profiles"
-              element={
-                <ProtectedRoute>
-                  <HREmployeeListPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/hr/hiring-management"
-              element={
-                <ProtectedRoute>
-                  <HRHiringManagementPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/hr/employee-profile/:employeeId"
-              element={
-                <ProtectedRoute>
-                  <HREmployeeDetailPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/hr/review-onboarding/:employeeId"
-              element={
-                <ProtectedRoute>
-                  <HROnboardingReviewPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route path="/" element={<Navigate to="/login" replace />} />
-          </Routes>
-        </div>
-      </Router>
+      <PersistGate loading={null} persistor={persistor}>
+        <Router>
+          <div className="App">
+            <Routes>
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegistrationPage />} />
+              <Route
+                path="/employee/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <EmployeeHomePage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/employee/onboarding"
+                element={
+                  <ProtectedRoute>
+                    <OnboardingApplicationPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/employee/personal-info"
+                element={
+                  <ProtectedRoute>
+                    <PersonalInformationPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/hr/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <HRDashboardPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/hr/employee-profiles"
+                element={
+                  <ProtectedRoute>
+                    <HREmployeeListPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/hr/hiring-management"
+                element={
+                  <ProtectedRoute>
+                    <HRHiringManagementPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/hr/employee-profile/:employeeId"
+                element={
+                  <ProtectedRoute>
+                    <HREmployeeDetailPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/hr/review-onboarding/:employeeId"
+                element={
+                  <ProtectedRoute>
+                    <HROnboardingReviewPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="/" element={<Navigate to="/login" replace />} />
+            </Routes>
+          </div>
+        </Router>
+      </PersistGate>
     </Provider>
   );
 }

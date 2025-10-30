@@ -1,5 +1,5 @@
-import React from 'react';
-import { GENDER_OPTIONS } from '../../../constants/options';
+import React from "react";
+import { GENDER_OPTIONS } from "../../../constants/options";
 
 const IdentitySection = ({ formData, errors, onChange }) => {
   return (
@@ -15,7 +15,7 @@ const IdentitySection = ({ formData, errors, onChange }) => {
             value={formData.ssn}
             onChange={onChange}
             placeholder="XXX-XX-XXXX"
-            className={errors.ssn ? 'error' : ''}
+            className={errors.ssn ? "error" : ""}
           />
           {errors.ssn && <span className="error-message">{errors.ssn}</span>}
         </div>
@@ -23,13 +23,15 @@ const IdentitySection = ({ formData, errors, onChange }) => {
           <label htmlFor="date_of_birth">Date of Birth *</label>
           <input
             type="date"
-            id="date_of_birth"
-            name="date_of_birth"
-            value={formData.date_of_birth}
+            id="dateOfBirth"
+            name="dateOfBirth"
+            value={formData.dateOfBirth}
             onChange={onChange}
-            className={errors.date_of_birth ? 'error' : ''}
+            className={errors.dateOfBirth ? "error" : ""}
           />
-          {errors.date_of_birth && <span className="error-message">{errors.date_of_birth}</span>}
+          {errors.dateOfBirth && (
+            <span className="error-message">{errors.dateOfBirth}</span>
+          )}
         </div>
         <div className="form-group">
           <label htmlFor="gender">Gender *</label>
@@ -38,14 +40,18 @@ const IdentitySection = ({ formData, errors, onChange }) => {
             name="gender"
             value={formData.gender}
             onChange={onChange}
-            className={errors.gender ? 'error' : ''}
+            className={errors.gender ? "error" : ""}
           >
             <option value="">Select Gender</option>
-            {GENDER_OPTIONS.map(opt => (
-              <option key={opt.value} value={opt.value}>{opt.label}</option>
+            {GENDER_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
             ))}
           </select>
-          {errors.gender && <span className="error-message">{errors.gender}</span>}
+          {errors.gender && (
+            <span className="error-message">{errors.gender}</span>
+          )}
         </div>
       </div>
     </div>
@@ -53,5 +59,3 @@ const IdentitySection = ({ formData, errors, onChange }) => {
 };
 
 export default IdentitySection;
-
-

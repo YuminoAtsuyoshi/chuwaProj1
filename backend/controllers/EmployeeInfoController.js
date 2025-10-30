@@ -22,7 +22,9 @@ const getEmployeeInfo = async (req, res, next) => {
 
 const updateEmployeeInfo = async (req, res, next) => {
   try {
-    let employeeInfo = await EmployeeInfo.findById(req.params?.employeeId);
+    let employeeInfo = await EmployeeInfo.findOne({
+      employeeId: req.params?.employeeId,
+    });
     if (!employeeInfo) {
       employeeInfo = new EmployeeInfo({});
       await Employee.updateOne(
@@ -56,8 +58,33 @@ const updateEmployeeInfo = async (req, res, next) => {
     employeeInfo.visa = req.body.visa || employeeInfo.visa;
     employeeInfo.addressBuilding =
       req.body.addressBuilding || employeeInfo.addressBuilding;
+    employeeInfo.referenceFirstName =
+      req.body.referenceFirstName || employeeInfo.referenceFirstName;
+    employeeInfo.referenceLastName =
+      req.body.referenceLastName || employeeInfo.referenceLastName;
+    employeeInfo.referenceMiddleName =
+      req.body.referenceMiddleName || employeeInfo.referenceMiddleName;
+    employeeInfo.referencePhone =
+      req.body.referencePhone || employeeInfo.referencePhone;
+    employeeInfo.referenceEmail =
+      req.body.referenceEmail || employeeInfo.referenceEmail;
+    employeeInfo.referenceRelationship =
+      req.body.referenceRelationship || employeeInfo.referenceRelationship;
     employeeInfo.emergencyContact =
       req.body.emergencyContact || employeeInfo.emergencyContact;
+    employeeInfo.isPrOrCitizen =
+      req.body.isPrOrCitizen || employeeInfo.isPrOrCitizen;
+    employeeInfo.prOrCitizenType =
+      req.body.prOrCitizenType || employeeInfo.prOrCitizenType;
+    employeeInfo.workAuthType =
+      req.body.workAuthType || employeeInfo.workAuthType;
+    employeeInfo.visaTitle = req.body.visaTitle || employeeInfo.visaTitle;
+    employeeInfo.visaStartDate =
+      req.body.visaStartDate || employeeInfo.visaStartDate;
+    employeeInfo.visaEndDate = req.body.visaEndDate || employeeInfo.visaEndDate;
+    employeeInfo.driverLicense =
+      req.body.driverLicense || employeeInfo.driverLicense;
+    employeeInfo.optReceipt = req.body.optReceipt || employeeInfo.optReceipt;
     await employeeInfo.save();
 
     if (req.body.optReceipt) {

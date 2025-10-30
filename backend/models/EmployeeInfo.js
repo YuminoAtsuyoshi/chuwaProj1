@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const referenceSchema = new mongoose.Schema({
+const ContactSchema = new mongoose.Schema({
   firstName: {
     type: String,
     required: true,
@@ -44,9 +44,9 @@ const employeeInfoSchema = new mongoose.Schema({
     type: String,
   },
   profilePicture: {
-    type: String,
-    default:
-      "https://upload.wikimedia.org/wikipedia/commons/8/83/Default-Icon.jpg",
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Doc",
+    default: "6903897cdcd920c6c1f86a03",
   },
   addressBuilding: {
     type: String,
@@ -84,7 +84,7 @@ const employeeInfoSchema = new mongoose.Schema({
     required: true,
   },
   dateOfBirth: {
-    type: Date,
+    type: String,
     required: true,
   },
   gender: {
@@ -99,15 +99,66 @@ const employeeInfoSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  reference: referenceSchema,
+  referenceFirstName: {
+    type: String,
+    required: true,
+  },
+  referenceLastName: {
+    type: String,
+    required: true,
+  },
+  referenceMiddleName: {
+    type: String,
+    required: true,
+  },
+  referencePhone: {
+    type: String,
+    required: true,
+  },
+  referenceEmail: {
+    type: String,
+    required: true,
+  },
+  referenceRelationship: {
+    type: String,
+    required: true,
+  },
   emergencyContact: {
-    type: [referenceSchema],
+    type: [ContactSchema],
     validate: {
       validator: function (v) {
         return v && v.length > 0;
       },
       message: "There should be at least one emergency contact",
     },
+  },
+  isPrOrCitizen: {
+    type: String,
+    required: true,
+  },
+  prOrCitizenType: {
+    type: String,
+    required: true,
+  },
+  workAuthType: {
+    type: String,
+  },
+  visaTitle: {
+    type: String,
+  },
+  visaStartDate: {
+    type: String,
+  },
+  visaEndDate: {
+    type: String,
+  },
+  driverLicense: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Doc",
+  },
+  optReceipt: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Doc",
   },
 });
 

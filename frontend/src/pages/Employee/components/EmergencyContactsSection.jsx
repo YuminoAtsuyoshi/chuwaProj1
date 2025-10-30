@@ -1,6 +1,12 @@
-import React from 'react';
+import React from "react";
 
-const EmergencyContactsSection = ({ contacts, errors, onChange, onAdd, onRemove }) => {
+const EmergencyContactsSection = ({
+  contacts,
+  errors,
+  onChange,
+  onAdd,
+  onRemove,
+}) => {
   return (
     <div className="form-section">
       <h3>Emergency Contacts</h3>
@@ -21,32 +27,36 @@ const EmergencyContactsSection = ({ contacts, errors, onChange, onAdd, onRemove 
 
           <div className="form-row">
             <div className="form-group">
-              <label htmlFor={`emergency_first_name_${index}`}>First Name *</label>
+              <label htmlFor={`emergency_firstName_${index}`}>
+                First Name *
+              </label>
               <input
                 type="text"
-                id={`emergency_first_name_${index}`}
-                value={contact.first_name}
-                onChange={(e) => onChange(index, 'first_name', e.target.value)}
-                className={errors[`emergency_contact_${index}`] ? 'error' : ''}
+                id={`emergency_firstName_${index}`}
+                value={contact.firstName}
+                onChange={(e) => onChange(index, "firstName", e.target.value)}
+                className={errors[`emergencyContact_${index}`] ? "error" : ""}
               />
             </div>
             <div className="form-group">
-              <label htmlFor={`emergency_last_name_${index}`}>Last Name *</label>
+              <label htmlFor={`emergency_lastName_${index}`}>Last Name *</label>
               <input
                 type="text"
-                id={`emergency_last_name_${index}`}
-                value={contact.last_name}
-                onChange={(e) => onChange(index, 'last_name', e.target.value)}
-                className={errors[`emergency_contact_${index}`] ? 'error' : ''}
+                id={`emergency_lastName_${index}`}
+                value={contact.lastName}
+                onChange={(e) => onChange(index, "lastName", e.target.value)}
+                className={errors[`emergencyContact_${index}`] ? "error" : ""}
               />
             </div>
             <div className="form-group">
-              <label htmlFor={`emergency_middle_name_${index}`}>Middle Name</label>
+              <label htmlFor={`emergency_middleName_${index}`}>
+                Middle Name
+              </label>
               <input
                 type="text"
-                id={`emergency_middle_name_${index}`}
-                value={contact.middle_name}
-                onChange={(e) => onChange(index, 'middle_name', e.target.value)}
+                id={`emergency_middleName_${index}`}
+                value={contact.middleName}
+                onChange={(e) => onChange(index, "middleName", e.target.value)}
               />
             </div>
           </div>
@@ -58,8 +68,8 @@ const EmergencyContactsSection = ({ contacts, errors, onChange, onAdd, onRemove 
                 type="tel"
                 id={`emergency_phone_${index}`}
                 value={contact.phone}
-                onChange={(e) => onChange(index, 'phone', e.target.value)}
-                className={errors[`emergency_contact_${index}`] ? 'error' : ''}
+                onChange={(e) => onChange(index, "phone", e.target.value)}
+                className={errors[`emergencyContact_${index}`] ? "error" : ""}
               />
             </div>
             <div className="form-group">
@@ -68,23 +78,29 @@ const EmergencyContactsSection = ({ contacts, errors, onChange, onAdd, onRemove 
                 type="email"
                 id={`emergency_email_${index}`}
                 value={contact.email}
-                onChange={(e) => onChange(index, 'email', e.target.value)}
+                onChange={(e) => onChange(index, "email", e.target.value)}
               />
             </div>
             <div className="form-group">
-              <label htmlFor={`emergency_relationship_${index}`}>Relationship *</label>
+              <label htmlFor={`emergency_relationship_${index}`}>
+                Relationship *
+              </label>
               <input
                 type="text"
                 id={`emergency_relationship_${index}`}
                 value={contact.relationship}
-                onChange={(e) => onChange(index, 'relationship', e.target.value)}
-                className={errors[`emergency_contact_${index}`] ? 'error' : ''}
+                onChange={(e) =>
+                  onChange(index, "relationship", e.target.value)
+                }
+                className={errors[`emergencyContact_${index}`] ? "error" : ""}
               />
             </div>
           </div>
 
-          {errors[`emergency_contact_${index}`] && (
-            <span className="error-message">{errors[`emergency_contact_${index}`]}</span>
+          {errors[`emergencyContact_${index}`] && (
+            <span className="error-message">
+              {errors[`emergencyContact_${index}`]}
+            </span>
           )}
         </div>
       ))}
@@ -97,5 +113,3 @@ const EmergencyContactsSection = ({ contacts, errors, onChange, onAdd, onRemove 
 };
 
 export default EmergencyContactsSection;
-
-
