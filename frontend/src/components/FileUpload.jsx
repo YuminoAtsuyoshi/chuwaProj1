@@ -1,42 +1,41 @@
-import React, { useState } from 'react';
-import { uploadFile } from '../api/auth';
-import './FileUpload.css';
+import React, { useState } from "react";
+import { uploadFile } from "../api/auth";
+import "./FileUpload.css";
 
-const FileUpload = ({ 
-  label, 
-  name, 
-  accept, 
-  fileType, 
-  onUploadSuccess, 
+const FileUpload = ({
+  label,
+  name,
+  accept,
+  fileType,
+  onUploadSuccess,
   onUploadError,
   required = false,
-  className = ''
+  className = "",
 }) => {
   const [uploading, setUploading] = useState(false);
   const [uploadedFile, setUploadedFile] = useState(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
     setUploading(true);
-    setError('');
+    setError("");
 
     try {
       const response = await uploadFile(file, fileType);
       setUploadedFile({
         name: file.name,
-        id: response.id,
+        id: response._id,
         url: response.url,
-        size: file.size
+        size: file.size,
       });
-      
+
       // Notify parent component
       onUploadSuccess(response.id, response.url);
-      
     } catch (error) {
-      setError(`Upload failed: ${error.message || 'Unknown error'}`);
+      setError(`Upload failed: ${error.message || "Unknown error"}`);
       onUploadError(error);
     } finally {
       setUploading(false);
@@ -44,11 +43,11 @@ const FileUpload = ({
   };
 
   const formatFileSize = (bytes) => {
-    if (bytes === 0) return '0 Bytes';
+    if (bytes === 0) return "0 Bytes";
     const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
 
   return (
@@ -56,7 +55,7 @@ const FileUpload = ({
       <label htmlFor={name} className="file-upload-label">
         {label} {required && <span className="required">*</span>}
       </label>
-      
+
       <div className="file-upload-container">
         <input
           type="file"
@@ -67,7 +66,7 @@ const FileUpload = ({
           disabled={uploading}
           className="file-input"
         />
-        
+
         <label htmlFor={name} className="file-upload-button">
           {uploading ? (
             <span className="uploading">
@@ -78,12 +77,14 @@ const FileUpload = ({
             <span>Choose File</span>
           )}
         </label>
-        
+
         {uploadedFile && (
           <div className="uploaded-file">
             <div className="file-info">
               <span className="file-name">{uploadedFile.name}</span>
-              <span className="file-size">({formatFileSize(uploadedFile.size)})</span>
+              <span className="file-size">
+                ({formatFileSize(uploadedFile.size)})
+              </span>
             </div>
             <div className="upload-success">
               <span className="checkmark">✓</span>
@@ -91,7 +92,7 @@ const FileUpload = ({
             </div>
           </div>
         )}
-        
+
         {error && (
           <div className="upload-error">
             <span className="error-icon">✗</span>

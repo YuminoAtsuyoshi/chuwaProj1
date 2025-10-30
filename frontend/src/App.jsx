@@ -15,6 +15,7 @@ import EmployeeOnboarding from "./pages/Employee/EmployeeOnboarding";
 import OnboardingApplicationPage from "./pages/Employee/OnboardingApplicationPage";
 import EmployeeHomePage from "./pages/Employee/EmployeeHomePage";
 import PersonalInformationPage from "./pages/Employee/PersonalInformationPage";
+import VisaManagementPage from "./pages/Employee/VisaManagementPage";
 import HRDashboardPage from "./pages/HR/HRDashboardPage";
 import HREmployeeListPage from "./pages/HR/HREmployeeListPage";
 import HREmployeeDetailPage from "./pages/HR/HREmployeeDetailPage";
@@ -53,6 +54,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <PersonalInformationPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/employee/visa-status"
+                element={
+                  <ProtectedRoute>
+                    <VisaManagementPage />
                   </ProtectedRoute>
                 }
               />
