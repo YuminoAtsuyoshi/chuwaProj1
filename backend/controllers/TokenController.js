@@ -1,7 +1,10 @@
 const Token = require("../models/Token.js");
 const Employee = require("../models/Employee.js");
 const generateToken = require("../utils/tokenGenerator.js");
-const sendEmail = require("../utils/emailService.js");
+const {
+  sendEmail,
+  sendNotificationEmail,
+} = require("../utils/emailService.js");
 
 const createToken = async (req, res, next) => {
   try {
@@ -22,15 +25,16 @@ const getTokens = async (req, res, next) => {
     const tokens = await Token.find({}).lean();
     // enrich with submitted flag and basic employee info if exists
     const emails = tokens.map((t) => t.email);
-    const employees = await Employee.find({ email: { $in: emails } }, {
-      email: 1,
-      status: 1,
-      stage: 1,
-      isHr: 1,
-    }).lean();
-    const emailToEmployee = new Map(
-      employees.map((e) => [e.email, e])
-    );
+    const employees = await Employee.find(
+      { email: { $in: emails } },
+      {
+        email: 1,
+        status: 1,
+        stage: 1,
+        isHr: 1,
+      }
+    ).lean();
+    const emailToEmployee = new Map(employees.map((e) => [e.email, e]));
     const enriched = tokens.map((t) => {
       const emp = emailToEmployee.get(t.email);
       const submitted = !!(emp && emp.isHr === false);
@@ -49,7 +53,21 @@ const getTokens = async (req, res, next) => {
   }
 };
 
+const SendNotification = async (req, res, next) => {
+  try {
+    const email = req.body.email;
+    const oldStage = req.body.oldStage;
+    const newStage = req.body.newStage;
+    await sendNotificationEmail(email, oldStage, newStage);
+    res.status(200).json({ status: "Email sent" });
+  } catch (err) {
+    err.statusCode = 500;
+    next(err);
+  }
+};
+
 module.exports = {
   createToken,
   getTokens,
+  SendNotification,
 };

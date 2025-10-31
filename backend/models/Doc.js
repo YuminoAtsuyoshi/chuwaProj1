@@ -11,6 +11,10 @@ const docSchema = new mongoose.Schema({
       message: "Valid URL is required",
     },
   },
+  fileType: {
+    type: String,
+    required: true,
+  },
 });
 
 const Doc = mongoose.model("Doc", docSchema);

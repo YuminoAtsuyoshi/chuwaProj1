@@ -60,10 +60,11 @@ const getOpts = async (req, res, next) => {
       searchQuery.type = req.query?.type;
     }
 
-    let query = await Opt.find(searchQuery);
-    query = query.sort({ createdAt: -1 }); // New to old
-
-    const opts = await query.skip(skip).limit(limit);
+    // New to old
+    const opts = await Opt.find(searchQuery)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
     res.status(200).json(opts);
   } catch (err) {
     err.statusCode = 500;

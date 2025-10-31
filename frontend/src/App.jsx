@@ -21,6 +21,7 @@ import HREmployeeListPage from "./pages/HR/HREmployeeListPage";
 import HREmployeeDetailPage from "./pages/HR/HREmployeeDetailPage";
 import HRHiringManagementPage from "./pages/HR/HRHiringManagementPage";
 import HROnboardingReviewPage from "./pages/HR/HROnboardingReviewPage";
+import HRVisaManagementPage from "./pages/HR/HRVisaManagementPage"; // ✅ 新增
 import ProtectedRoute from "./components/ProtectedRoute";
 import "./App.css";
 
@@ -105,6 +106,15 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <HROnboardingReviewPage />
+                  </ProtectedRoute>
+                }
+              />
+              {/* ✅ 新增的 Visa 页面 */}
+              <Route
+                path="/hr/visa-management"
+                element={
+                  <ProtectedRoute>
+                    <HRVisaManagementPage />
                   </ProtectedRoute>
                 }
               />

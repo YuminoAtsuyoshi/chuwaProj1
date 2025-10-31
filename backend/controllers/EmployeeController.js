@@ -163,8 +163,8 @@ const makeDecision = async (req, res, next) => {
   try {
     const employee = await Employee.findById(req.params?.employeeId);
     const decision = req.body.decision;
-    if (employee.status !== "pending") {
-      const err = new Error("Decision can not be done in non-pending status");
+    if (employee.status === "approved") {
+      const err = new Error("This stage has been approved");
       err.statusCode = 500;
       next(err);
       return;

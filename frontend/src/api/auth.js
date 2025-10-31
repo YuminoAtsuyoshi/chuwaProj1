@@ -173,6 +173,19 @@ export const getRegistrationToken = async (token) => {
   }
 };
 
+// Send notification email (for HR visa page)
+export const sendNotification = async (email, oldStage, newStage) => {
+  try {
+    const response = await employeeAPI.post(
+      `/registration-tokens/sendNofitication`,
+      { email: email, oldStage: oldStage, newStage: newStage }
+    );
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error.message;
+  }
+};
+
 // Generate registration token (for HR)
 // Note: This endpoint should use the tokenGenerator.js from utils
 // Backend may implement this via emailService.js

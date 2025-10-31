@@ -27,4 +27,21 @@ const sendEmail = async (address, token) => {
   }
 };
 
-module.exports = sendEmail;
+const sendNotificationEmail = async (address, oldStage, newStage) => {
+  try {
+    const info = await transporter.sendMail({
+      from: '"Employee Management System" <zxy119010445@163.com>',
+      to: address,
+      subject: `Please submit ${newStage} in Employee Management System`,
+      text: `Your ${oldStage} form has been approved. Please go to https://localhost:5173//employee/visa-status to submit your ${newStage} form.`,
+      html: `Your ${oldStage} form has been approved. Please go to <a href="https://localhost:5173//employee/visa-status">https://localhost:5173//employee/visa-status</a> to submit your ${newStage} form.`,
+    });
+
+    console.log("Message sent: %s", info.messageId);
+    console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
+  } catch (err) {
+    console.error("Error while sending mail", err);
+  }
+};
+
+module.exports = { sendEmail, sendNotificationEmail };
