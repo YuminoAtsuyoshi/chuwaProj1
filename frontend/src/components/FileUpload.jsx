@@ -27,13 +27,13 @@ const FileUpload = ({
       const response = await uploadFile(file, fileType);
       setUploadedFile({
         name: file.name,
-        id: response.id,
+        id: response._id || response.id,
         url: response.url,
         size: file.size
       });
       
       // Notify parent component
-      onUploadSuccess(response.id, response.url);
+      onUploadSuccess(response._id || response.id, response.url);
       
     } catch (error) {
       setError(`Upload failed: ${error.message || 'Unknown error'}`);

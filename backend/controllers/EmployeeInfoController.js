@@ -22,6 +22,14 @@ const getEmployeeInfo = async (req, res, next) => {
 
 const updateEmployeeInfo = async (req, res, next) => {
   try {
+    // only the authenticated employee can update their own info
+    if (req.user?.id !== req.params?.employeeId) {
+      const err = new Error("Forbidden: cannot modify other user's info");
+      err.statusCode = 403;
+      next(err);
+      return;
+    }
+
     let employeeInfo = await EmployeeInfo.findOne({
       employeeId: req.params?.employeeId,
     });
@@ -31,7 +39,7 @@ const updateEmployeeInfo = async (req, res, next) => {
         { _id: req.params?.employeeId },
         { personInfo: employeeInfo._id }
       );
-      employeeInfo.employeeId = req.body.employeeId;
+      employeeInfo.employeeId = req.params?.employeeId;
     }
     employeeInfo.firstName = req.body.firstName || employeeInfo.firstName;
     employeeInfo.lastName = req.body.lastName || employeeInfo.lastName;
@@ -39,7 +47,7 @@ const updateEmployeeInfo = async (req, res, next) => {
     employeeInfo.preferredName =
       req.body.preferredName || employeeInfo.preferredName;
     if (req.file) {
-      employeeInfo.profilePicture = `http://localhost:3000/${req.file.filename}`;
+      employeeInfo.profilePicture = `http://localhost:3000/fileStorage/${req.file.filename}`;
     }
     employeeInfo.addressBuilding =
       req.body.addressBuilding || employeeInfo.addressBuilding;
@@ -55,7 +63,7 @@ const updateEmployeeInfo = async (req, res, next) => {
     employeeInfo.ssn = req.body.ssn || employeeInfo.ssn;
     employeeInfo.dateOfBirth = req.body.dateOfBirth || employeeInfo.dateOfBirth;
     employeeInfo.gender = req.body.gender || employeeInfo.gender;
-    employeeInfo.visa = req.body.visa || employeeInfo.visa;
+    // visa is derived from isPrOrCitizen/prOrCitizenType/workAuthType in this app
     employeeInfo.addressBuilding =
       req.body.addressBuilding || employeeInfo.addressBuilding;
     employeeInfo.referenceFirstName =
@@ -84,6 +92,8 @@ const updateEmployeeInfo = async (req, res, next) => {
     employeeInfo.visaEndDate = req.body.visaEndDate || employeeInfo.visaEndDate;
     employeeInfo.driverLicense =
       req.body.driverLicense || employeeInfo.driverLicense;
+    employeeInfo.workAuthDoc =
+      req.body.workAuthDoc || employeeInfo.workAuthDoc;
     employeeInfo.optReceipt = req.body.optReceipt || employeeInfo.optReceipt;
     await employeeInfo.save();
 
@@ -109,13 +119,25 @@ const updateEmployeeInfo = async (req, res, next) => {
 
 const submitForm = async (req, res, next) => {
   try {
+    // only the authenticated employee can submit their own form
+    if (req.user?.id !== req.params?.employeeId) {
+      const err = new Error("Forbidden: cannot submit for other user");
+      err.statusCode = 403;
+      next(err);
+      return;
+    }
+
     const employee = await Employee.findById(req.params?.employeeId);
     if (employee.stage === "onboarding") {
       if (
         employee.status === "never_submit" ||
         employee.status === "rejected"
       ) {
-        employee.status === "pending";
+        employee.status = "pending";
+        // Record submission date as ISO YYYY-MM-DD to avoid TZ drift
+        const today = new Date();
+        const isoDate = today.toISOString().slice(0, 10); // YYYY-MM-DD
+        employee.submissionDate = isoDate;
       } else {
         const err = new Error("Status wrong");
         err.statusCode = 404;

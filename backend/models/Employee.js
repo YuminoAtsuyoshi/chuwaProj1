@@ -4,6 +4,7 @@ const employeeSchema = new mongoose.Schema({
   username: {
     type: String,
     required: true,
+    unique: true,
   },
   password: {
     type: String,
@@ -11,14 +12,17 @@ const employeeSchema = new mongoose.Schema({
   },
   email: {
     type: String,
-    require: true,
+    required: true,
+    unique: true,
   },
   stage: {
     type: String,
+    enum: ["onboarding", "OPT Receipt", "OPT EAD", "I-983", "I-20"],
     default: "onboarding",
   },
   status: {
     type: String,
+    enum: ["never_submit", "pending", "approved", "rejected"],
     default: "never_submit",
   },
   personInfo: {

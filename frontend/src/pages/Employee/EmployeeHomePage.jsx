@@ -81,11 +81,14 @@ const EmployeeHomePage = () => {
     navigate("/employee/personal-info");
   };
 
+  const handleVisaStatusClick = () => {
+    navigate("/employee/visa-status");
+  };
+
   const handleApplicationStatusClick = () => {
     if (employee?.stage === "onboarding") {
       navigate("/employee/onboarding");
     } else {
-      // Placeholder for other stages
       console.log("Application status for other stages - to be implemented");
     }
   };
@@ -109,7 +112,8 @@ const EmployeeHomePage = () => {
           <button onClick={handlePersonalInfoClick} className="nav-link">
             Personal Information
           </button>
-          <button className="nav-link placeholder" disabled>
+          
+          <button onClick={handleVisaStatusClick} className="nav-link">
             Visa Status Management
           </button>
           <button onClick={handleLogout} className="nav-link logout">
@@ -163,23 +167,17 @@ const EmployeeHomePage = () => {
             </div>
           </div>
 
-          {/* Visa Status Card */}
-          <div className="info-card placeholder-card">
+          <div className="info-card">
             <div className="card-header">
               <h3>Visa Status</h3>
               <div className="card-icon">📋</div>
             </div>
             <div className="card-content">
-              <div className="placeholder-content">
-                <p>Visa status management will be available soon.</p>
-                <p className="placeholder-note">
-                  This feature is currently under development.
-                </p>
-              </div>
+              <p>Manage your visa documents and status.</p>
             </div>
             <div className="card-footer">
-              <button className="card-button disabled" disabled>
-                Coming Soon
+              <button onClick={handleVisaStatusClick} className="card-button">
+                View Details
               </button>
             </div>
           </div>

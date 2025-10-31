@@ -1,10 +1,17 @@
 import React from 'react';
 
 const FilesSummary = ({ uploadedFiles, onPreview, onDownload }) => {
+  const hasAnyDocument =
+    uploadedFiles.profilePictureDocId ||
+    uploadedFiles.driverLicenseDocId ||
+    uploadedFiles.workAuthDocId ||
+    uploadedFiles.optReceiptDocId;
+
   return (
     <div className="form-section">
-      <h3>Uploaded Documents</h3>
+      <h3>Summary of Uploaded Files or Documents</h3>
       <div className="document-list">
+        {/* Profile Picture */}
         {uploadedFiles.profilePictureDocId && (
           <div className="document-item">
             <div className="document-info">
@@ -28,6 +35,7 @@ const FilesSummary = ({ uploadedFiles, onPreview, onDownload }) => {
           </div>
         )}
 
+        {/* Driver's License */}
         {uploadedFiles.driverLicenseDocId && (
           <div className="document-item">
             <div className="document-info">
@@ -51,11 +59,36 @@ const FilesSummary = ({ uploadedFiles, onPreview, onDownload }) => {
           </div>
         )}
 
+        {/* Work Authorization Document */}
+        {uploadedFiles.workAuthDocId && (
+          <div className="document-item">
+            <div className="document-info">
+              <span className="document-name">Work Authorization</span>
+              <span className="document-type">Document</span>
+            </div>
+            <div className="document-actions">
+              <button 
+                onClick={() => onPreview(uploadedFiles.workAuthDocId)}
+                className="preview-btn"
+              >
+                Preview
+              </button>
+              <button 
+                onClick={() => onDownload(uploadedFiles.workAuthDocId, 'work-authorization')}
+                className="download-btn"
+              >
+                Download
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* OPT Receipt (Only for F1 OPT) */}
         {uploadedFiles.optReceiptDocId && (
           <div className="document-item">
             <div className="document-info">
               <span className="document-name">OPT Receipt</span>
-              <span className="document-type">Work Authorization</span>
+              <span className="document-type">Document</span>
             </div>
             <div className="document-actions">
               <button 
@@ -74,7 +107,7 @@ const FilesSummary = ({ uploadedFiles, onPreview, onDownload }) => {
           </div>
         )}
 
-        {!uploadedFiles.profilePictureDocId && !uploadedFiles.driverLicenseDocId && !uploadedFiles.optReceiptDocId && (
+        {!hasAnyDocument && (
           <div className="no-documents">
             <p>No documents uploaded yet.</p>
           </div>

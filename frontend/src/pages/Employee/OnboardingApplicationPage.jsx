@@ -15,6 +15,7 @@ import IdentitySection from "./components/IdentitySection";
 import PersonalDetailsSection from "./components/PersonalDetailsSection";
 import AddressSection from "./components/AddressSection";
 import "./OnboardingApplicationPage.css";
+import EmployeeNav from "../../components/EmployeeNav";
 
 const OnboardingApplicationPage = () => {
   const [employee, setEmployee] = useState(null);
@@ -177,7 +178,8 @@ const OnboardingApplicationPage = () => {
               ...prev,
               profilePictureDocId: employeeData.profilePicture,
               driverLicenseDocId: employeeData.driverLicense,
-              optReceiptDocId: employeeData.optReceiptUpload,
+              workAuthDocId: employeeData.workAuthDoc,
+              optReceiptDocId: employeeData.optReceipt,
             }));
           }
         } catch (error) {
@@ -195,7 +197,7 @@ const OnboardingApplicationPage = () => {
   }, [user?._id, navigate]);
 
   const handleInputChange = (e) => {
-    const { name, value, type, files } = e.target;
+    const { name, value, type, files, validity } = e.target;
 
     if (type === "file") {
       setFormData((prev) => ({
@@ -209,13 +211,74 @@ const OnboardingApplicationPage = () => {
       }));
     }
 
-    // Clear error when user starts typing
-    if (errors[name]) {
-      setErrors((prev) => ({
-        ...prev,
-        [name]: "",
-      }));
-    }
+    // Inline validation for specific fields
+    setErrors((prev) => {
+      const next = { ...prev };
+      // SSN: exactly 9 digits
+      if (name === "ssn") {
+        const digits = (value || "").replace(/\D/g, "");
+        next.ssn = /^\d{9}$/.test(digits) ? "" : "SSN must be exactly 9 digits";
+      } else if (name === "dateOfBirth" && value) {
+        // Native min validation (prevents 0011 etc.)
+        if (validity && validity.rangeUnderflow) {
+          next.dateOfBirth = "Date of birth must be after 1900-01-01.";
+          return next;
+        }
+        // Past date; age: 0–120 years
+        const dob = new Date(value);
+        const today = new Date();
+        const dobDay = new Date(dob.getFullYear(), dob.getMonth(), dob.getDate());
+        const todayDay = new Date(
+          today.getFullYear(),
+          today.getMonth(),
+          today.getDate()
+        );
+        const minDob = new Date(1900, 0, 1);
+        if (dobDay < minDob) {
+          next.dateOfBirth = "Date of birth must be after 1900-01-01.";
+          return next;
+        }
+        if (dobDay >= todayDay) {
+          next.dateOfBirth = "Please enter a past date.";
+        } else {
+          const age = (todayDay - dobDay) / (1000 * 60 * 60 * 24 * 365.25);
+          if (age > 120 || age <= 0) {
+            next.dateOfBirth = "Please enter a valid age.";
+          } else {
+            next.dateOfBirth = "";
+          }
+        }
+      } else if (name === "isPrOrCitizen") {
+        if (value === "yes") {
+          // Clear work auth related fields when switching to citizen/PR
+          next.workAuthType = "";
+          next.visaTitle = "";
+          next.visaStartDate = "";
+          next.visaEndDate = "";
+          // Clear any related errors
+          next.workAuthType = "";
+          next.workAuthDocId = "";
+          next.optReceiptDocId = "";
+        }
+      } else if ((name === "visaStartDate" || name === "visaEndDate") &&
+                 formData.isPrOrCitizen === "no" && formData.workAuthType) {
+        const start = name === "visaStartDate" ? value : formData.visaStartDate;
+        const end = name === "visaEndDate" ? value : formData.visaEndDate;
+        const minDate = new Date(1900, 0, 1);
+        if ((start && new Date(start) < minDate) || (end && new Date(end) < minDate) || (validity && validity.rangeUnderflow)) {
+          next.visaStartDate = "Dates must be after 1900-01-01";
+        } else if (start && end && new Date(start) > new Date(end)) {
+          next.visaEndDate = "End date cannot be earlier than start date";
+        } else {
+          next.visaStartDate = "";
+          next.visaEndDate = "";
+        }
+      } else if (name in next) {
+        // clear generic field error on typing
+        next[name] = "";
+      }
+      return next;
+    });
   };
 
   // File upload handlers moved to useFileUpload hook
@@ -357,6 +420,7 @@ const OnboardingApplicationPage = () => {
   if (isPendingState) {
     return (
       <div className="onboarding-container">
+        <EmployeeNav active="visa" />
         <div className="onboarding-header">
           <h1>Employee Onboarding Application</h1>
           <div className="pending-message">
@@ -475,6 +539,37 @@ const OnboardingApplicationPage = () => {
             </div>
           </div>
 
+          {/* Reference Section (readonly after submit) */}
+          <div className="form-section">
+            <h3>Reference</h3>
+            <div className="readonly-field-group">
+              <div className="readonly-field">
+                <label>First Name:</label>
+                <span>{formData.referenceFirstName || "N/A"}</span>
+              </div>
+              <div className="readonly-field">
+                <label>Last Name:</label>
+                <span>{formData.referenceLastName || "N/A"}</span>
+              </div>
+              <div className="readonly-field">
+                <label>Middle Name:</label>
+                <span>{formData.referenceMiddleName || "N/A"}</span>
+              </div>
+              <div className="readonly-field">
+                <label>Phone:</label>
+                <span>{formData.referencePhone || "N/A"}</span>
+              </div>
+              <div className="readonly-field">
+                <label>Email:</label>
+                <span>{formData.referenceEmail || "N/A"}</span>
+              </div>
+              <div className="readonly-field">
+                <label>Relationship:</label>
+                <span>{formData.referenceRelationship || "N/A"}</span>
+              </div>
+            </div>
+          </div>
+
           {/* Document Management Section */}
           <FilesSummary
             uploadedFiles={uploadedFiles}
@@ -559,7 +654,7 @@ const OnboardingApplicationPage = () => {
         />
 
         {/* Reference Section */}
-        <ReferenceSection formData={formData} onChange={handleInputChange} />
+        <ReferenceSection formData={formData} errors={errors} onChange={handleInputChange} />
 
         {/* Emergency Contacts Section */}
         <EmergencyContactsSection
@@ -568,6 +663,13 @@ const OnboardingApplicationPage = () => {
           onChange={handleEmergencyContactChange}
           onAdd={addEmergencyContact}
           onRemove={removeEmergencyContact}
+        />
+
+        {/* Summary of Uploaded Files or Documents */}
+        <FilesSummary
+          uploadedFiles={uploadedFiles}
+          onPreview={handleDocumentPreview}
+          onDownload={handleDocumentDownload}
         />
 
         {/* Submit Button */}

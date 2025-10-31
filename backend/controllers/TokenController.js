@@ -1,4 +1,5 @@
 const Token = require("../models/Token.js");
+const Employee = require("../models/Employee.js");
 const generateToken = require("../utils/tokenGenerator.js");
 const sendEmail = require("../utils/emailService.js");
 
@@ -18,8 +19,30 @@ const createToken = async (req, res, next) => {
 
 const getTokens = async (req, res, next) => {
   try {
-    const tokens = await Token.find({});
-    res.status(200).json(tokens);
+    const tokens = await Token.find({}).lean();
+    // enrich with submitted flag and basic employee info if exists
+    const emails = tokens.map((t) => t.email);
+    const employees = await Employee.find({ email: { $in: emails } }, {
+      email: 1,
+      status: 1,
+      stage: 1,
+      isHr: 1,
+    }).lean();
+    const emailToEmployee = new Map(
+      employees.map((e) => [e.email, e])
+    );
+    const enriched = tokens.map((t) => {
+      const emp = emailToEmployee.get(t.email);
+      const submitted = !!(emp && emp.isHr === false);
+      return {
+        ...t,
+        submitted,
+        employee: emp
+          ? { email: emp.email, status: emp.status, stage: emp.stage }
+          : null,
+      };
+    });
+    res.status(200).json(enriched);
   } catch (err) {
     err.statusCode = 500;
     next(err);

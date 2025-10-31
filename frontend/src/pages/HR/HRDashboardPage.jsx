@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { logout } from '../../store';
 import './HRDashboardPage.css';
+import HRNav from '../../components/HRNav';
 
 const HRDashboardPage = () => {
   const [loading, setLoading] = useState(true);
@@ -67,44 +68,7 @@ const HRDashboardPage = () => {
 
   return (
     <div className="hr-dashboard-container">
-      {/* Navigation Bar */}
-      <nav className="hr-nav">
-        <div className="nav-brand">
-          <h2>HR Portal</h2>
-        </div>
-        <div className="nav-links">
-          <button 
-            onClick={() => navigate('/hr/dashboard')}
-            className="nav-link active"
-          >
-            Home
-          </button>
-          <button 
-            onClick={() => navigate('/hr/employee-profiles')}
-            className="nav-link"
-          >
-            Employee Profiles
-          </button>
-          <button 
-            className="nav-link placeholder"
-            disabled
-          >
-            Visa Status Management
-          </button>
-          <button 
-            onClick={() => navigate('/hr/hiring-management')}
-            className="nav-link"
-          >
-            Hiring Management
-          </button>
-          <button 
-            onClick={handleLogout}
-            className="nav-link logout"
-          >
-            Logout
-          </button>
-        </div>
-      </nav>
+      <HRNav active="home" />
 
       {/* Main Content */}
       <div className="hr-dashboard-content">

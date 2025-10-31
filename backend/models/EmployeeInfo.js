@@ -46,7 +46,7 @@ const employeeInfoSchema = new mongoose.Schema({
   profilePicture: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Doc",
-    default: "6903897cdcd920c6c1f86a03",
+    // default removed; will use placeholder on frontend if absent
   },
   addressBuilding: {
     type: String,
@@ -91,14 +91,7 @@ const employeeInfoSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  visa: {
-    type: String,
-    required: true,
-  },
-  addressBuilding: {
-    type: String,
-    required: true,
-  },
+  // visa details are represented by isPrOrCitizen/prOrCitizenType/workAuthType
   referenceFirstName: {
     type: String,
     required: true,
@@ -109,7 +102,7 @@ const employeeInfoSchema = new mongoose.Schema({
   },
   referenceMiddleName: {
     type: String,
-    required: true,
+    // optional
   },
   referencePhone: {
     type: String,
@@ -138,10 +131,21 @@ const employeeInfoSchema = new mongoose.Schema({
   },
   prOrCitizenType: {
     type: String,
-    required: true,
+    validate: {
+      validator: function (v) {
+        return this.isPrOrCitizen !== "yes" || !!v;
+      },
+      message: "prOrCitizenType is required when isPrOrCitizen is yes",
+    },
   },
   workAuthType: {
     type: String,
+    validate: {
+      validator: function (v) {
+        return this.isPrOrCitizen !== "no" || !!v;
+      },
+      message: "workAuthType is required when isPrOrCitizen is no",
+    },
   },
   visaTitle: {
     type: String,
@@ -153,6 +157,10 @@ const employeeInfoSchema = new mongoose.Schema({
     type: String,
   },
   driverLicense: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Doc",
+  },
+  workAuthDoc: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Doc",
   },

@@ -2,6 +2,7 @@ const express = require("express");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const Employee = require("../models/Employee");
+const Token = require("../models/Token");
 const router = express.Router();
 
 //使用的是jwt模式
@@ -57,16 +58,52 @@ router.post("/login", async (req, res, next) => {
 router.post("/register", async (req, res, next) => {
   try {
     console.log("Register request body:", req.body);
-    const { username, password, email, isHr } = req.body;
+    const { username, password, token: registrationToken } = req.body;
+
+    // validate registration token
+    if (!registrationToken) {
+      const err = new Error("Registration token is required");
+      err.statusCode = 400;
+      next(err);
+      return;
+    }
+
+    const tokenRecord = await Token.findOne({ token: registrationToken });
+    if (!tokenRecord) {
+      const err = new Error("Invalid registration token");
+      err.statusCode = 400;
+      next(err);
+      return;
+    }
+    const now = new Date();
+    if (tokenRecord.expiresAt && now > tokenRecord.expiresAt) {
+      const err = new Error("Registration token has expired");
+      err.statusCode = 400;
+      next(err);
+      return;
+    }
+    if (tokenRecord.status && tokenRecord.status !== "valid") {
+      const err = new Error("Registration token has been used or is invalid");
+      err.statusCode = 400;
+      next(err);
+      return;
+    }
+
+    const email = tokenRecord.email; // enforce email from token
+
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = new Employee({
       username: username,
       password: hashedPassword,
       email: email,
-      isHr: JSON.parse(isHr),
+      isHr: false,
     });
-    user.save();
+    await user.save();
+
+    // mark token as used
+    tokenRecord.status = "used";
+    await tokenRecord.save();
 
     const payload = {
       user: {

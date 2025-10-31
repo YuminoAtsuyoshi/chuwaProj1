@@ -10,6 +10,8 @@ const tokensRouter = require("./routers/tokens");
 const errorHandlerMiddleware = require("./middlewares/errorHandler");
 const app = express();
 const fs = require("fs");
+const path = require("path");
+const UPLOAD_DIR = path.join(__dirname, "uploads");
 
 connectDB();
 
@@ -38,16 +40,20 @@ app.get("/health", (req, res) => {
 app.get("/fileStorage/:filename", (req, res) => {
   const filename = req.params.filename;
   if (filename.endsWith(".pdf")) {
-    // pdf
-    res.download(`./uploads/${filename}`, filename, (err) => {
+    // Stream/serve PDF for in-browser preview
+    const filePath = path.join(UPLOAD_DIR, filename);
+    fs.readFile(filePath, (err, data) => {
       if (err) {
-        console.error("Error sending file: ", err);
-        res.status(500).send("Error downlaoding file.");
+        console.error("Error reading pdf: ", err);
+        res.status(500).send("Error reading pdf.");
+        return;
       }
+      res.setHeader("Content-Type", "application/pdf");
+      res.status(200).send(data);
     });
   } else {
     // jpg & png
-    fs.readFile(`./uploads/${filename}`, (err, data) => {
+    fs.readFile(path.join(UPLOAD_DIR, filename), (err, data) => {
       if (err) {
         console.error("Error reading image: ", err);
         res.status(500).send("Error reading image.");

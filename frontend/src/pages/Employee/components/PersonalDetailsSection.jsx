@@ -1,4 +1,5 @@
 import React from "react";
+import placeholderImg from "../../../assets/cow-horse.svg";
 import FileUpload from "../../../components/FileUpload";
 
 const PersonalDetailsSection = ({
@@ -64,6 +65,20 @@ const PersonalDetailsSection = ({
           />
         </div>
       </div>
+
+      {/* Default placeholder avatar */}
+      {!formData.profilePicture && (
+        <div style={{ display: "flex", alignItems: "center", marginBottom: 12 }}>
+          <img
+            src={placeholderImg}
+            alt="Default profile"
+            style={{ width: 96, height: 96, borderRadius: 12, border: "1px solid #e5e7eb", background: "#fff" }}
+          />
+          <div style={{ marginLeft: 12, color: "#6b7280" }}>
+            Default profile picture (you can upload your own below)
+          </div>
+        </div>
+      )}
 
       <FileUpload
         label="Profile Picture"

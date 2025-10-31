@@ -55,7 +55,32 @@ const DocsList = ({ employeeInfo, onPreview, onDownload }) => {
           </div>
         )}
 
-        {employeeInfo.optReceiptUpload && (
+        {employeeInfo.workAuthDoc && (
+          <div className="document-item">
+            <div className="document-info">
+              <span className="document-name">Work Authorization</span>
+              <span className="document-type">Document</span>
+            </div>
+            <div className="document-actions">
+              <button
+                onClick={() => onPreview(employeeInfo.workAuthDoc)}
+                className="preview-btn"
+              >
+                Preview
+              </button>
+              <button
+                onClick={() =>
+                  onDownload(employeeInfo.workAuthDoc, "work-auth")
+                }
+                className="download-btn"
+              >
+                Download
+              </button>
+            </div>
+          </div>
+        )}
+
+        {(employeeInfo.optReceipt || employeeInfo.optReceiptUpload) && (
           <div className="document-item">
             <div className="document-info">
               <span className="document-name">OPT Receipt</span>
@@ -63,14 +88,14 @@ const DocsList = ({ employeeInfo, onPreview, onDownload }) => {
             </div>
             <div className="document-actions">
               <button
-                onClick={() => onPreview(employeeInfo.optReceiptUpload)}
+                onClick={() => onPreview(employeeInfo.optReceipt || employeeInfo.optReceiptUpload)}
                 className="preview-btn"
               >
                 Preview
               </button>
               <button
                 onClick={() =>
-                  onDownload(employeeInfo.optReceiptUpload, "opt-receipt")
+                  onDownload((employeeInfo.optReceipt || employeeInfo.optReceiptUpload), "opt-receipt")
                 }
                 className="download-btn"
               >
@@ -82,7 +107,8 @@ const DocsList = ({ employeeInfo, onPreview, onDownload }) => {
 
         {!employeeInfo.profilePicture &&
           !employeeInfo.driverLicense &&
-          !employeeInfo.optReceiptUpload && (
+          !employeeInfo.workAuthDoc &&
+          !(employeeInfo.optReceipt || employeeInfo.optReceiptUpload) && (
             <div className="no-documents">
               <p>No documents uploaded.</p>
             </div>

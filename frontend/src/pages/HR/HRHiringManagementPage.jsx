@@ -7,6 +7,7 @@ import {
   getAllEmployees,
 } from "../../api/auth";
 import "./HRHiringManagementPage.css";
+import HRNav from "../../components/HRNav";
 
 const HRHiringManagementPage = () => {
   const [tokens, setTokens] = useState([]);
@@ -221,12 +222,26 @@ const HRHiringManagementPage = () => {
 
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
+    // Handle ISO YYYY-MM-DD strings without timezone shift
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+      const date = new Date(`${dateString}T00:00:00`);
+      return date.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      });
+    }
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return "N/A";
+      return date.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      });
+    } catch (_) {
+      return "N/A";
+    }
   };
 
   const getFullName = (emp) => {
@@ -267,6 +282,7 @@ const HRHiringManagementPage = () => {
 
   return (
     <div className="hiring-management-container">
+      <HRNav active="hiring" />
       <div className="page-header">
         <h1>Hiring Management</h1>
         <p>Manage registration tokens and review pending applications</p>

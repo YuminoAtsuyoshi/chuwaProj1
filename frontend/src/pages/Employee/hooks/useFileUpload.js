@@ -6,6 +6,7 @@ export const useFileUpload = ({ setErrors, setMessage }) => {
     profilePictureDocId: null,
     driverLicenseDocId: null,
     optReceiptDocId: null,
+    workAuthDocId: null,
   });
 
   const handleFileUploadSuccess = (fileType, docId, _docUrl) => {

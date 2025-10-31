@@ -10,10 +10,13 @@ import { useHRReview } from "./hooks/useHRReview";
 import ReviewFormReadonly from "./components/ReviewFormReadonly";
 import DocsList from "./components/DocsList";
 import "./HROnboardingReviewPage.css";
+import HRNav from "../../components/HRNav";
 
 const HROnboardingReviewPage = () => {
   const {
+    employeeId,
     employee,
+    setEmployee,
     employeeInfo,
     loading,
     message,
@@ -131,6 +134,7 @@ const HROnboardingReviewPage = () => {
 
   return (
     <div className="hr-review-container">
+      <HRNav active="hiring" />
       <div className="review-header">
         <div className="header-content">
           <button

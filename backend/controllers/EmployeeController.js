@@ -7,7 +7,7 @@ const createEmployee = async (req, res, next) => {
       username: req.body.username,
     });
     const employeeByEmail = await Employee.findOne({
-      username: req.body.email,
+      email: req.body.email,
     });
     if (employeeByUsername) {
       const err = new Error("Username already used");
@@ -29,8 +29,9 @@ const createEmployee = async (req, res, next) => {
       employee.status = "never_submit";
     }
     await employee.save();
-    const { password, ...employeeWithoutPassword } = employee; // Remove password from response
-    res.status(200).json(employeeWithoutPassword);
+    const employeeObj = employee.toObject();
+    delete employeeObj.password;
+    res.status(200).json(employeeObj);
   } catch (err) {
     err.statusCode = 500;
     next(err);
@@ -66,7 +67,7 @@ const getAllEmployee = async (req, res, next) => {
       page = parseInt(req.query?.page);
     }
     if (req.query?.limit === undefined) {
-      limit = 10;
+      limit = 1000;
     } else {
       limit = parseInt(req.query?.limit);
     }

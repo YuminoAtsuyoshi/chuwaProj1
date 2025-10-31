@@ -27,6 +27,7 @@ const IdentitySection = ({ formData, errors, onChange }) => {
             name="dateOfBirth"
             value={formData.dateOfBirth}
             onChange={onChange}
+            min="1900-01-01"
             className={errors.dateOfBirth ? "error" : ""}
           />
           {errors.dateOfBirth && (

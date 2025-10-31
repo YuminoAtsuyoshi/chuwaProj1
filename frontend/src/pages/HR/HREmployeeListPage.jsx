@@ -3,6 +3,7 @@ import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { getAllEmployees, getEmployeerInfo } from "../../api/auth";
 import "./HREmployeeListPage.css";
+import HRNav from "../../components/HRNav";
 
 const HREmployeeListPage = () => {
   const [employees, setEmployees] = useState([]);
@@ -185,6 +186,7 @@ const HREmployeeListPage = () => {
 
   return (
     <div className="hr-profiles-container">
+      <HRNav active="profiles" />
       <div className="page-header">
         <h1>Employee Profiles</h1>
         <p>View and manage employee profiles</p>

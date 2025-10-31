@@ -73,7 +73,8 @@ const WorkAuthSection = ({
             <option value="">Select Type</option>
             <option value="H1-B">H1-B</option>
             <option value="L2">L2</option>
-            <option value="F1(CPT/OPT)">F1(CPT/OPT)</option>
+            <option value="F1 CPT">F1 CPT</option>
+            <option value="F1 OPT">F1 OPT</option>
             <option value="H4">H4</option>
             <option value="Other">Other</option>
           </select>
@@ -83,9 +84,64 @@ const WorkAuthSection = ({
         </div>
       )}
 
-      {formData.workAuthType === "F1(CPT/OPT)" && (
+      {/* For any non-citizen work auth type, always require a document and start/end dates */}
+      {formData.isPrOrCitizen === "no" && formData.workAuthType && (
+        <>
+          <div className="file-action-row">
+            <FileUpload
+            label="Work Authorization Document *"
+            name="work_auth_document"
+            accept=".pdf,.jpg,.jpeg,.png"
+            fileType="workAuthDocId"
+            onUploadSuccess={(docId, docUrl) =>
+              onUploadSuccess("workAuthDocId", docId, docUrl)
+            }
+            onUploadError={(error) => onUploadError("workAuthDocId", error)}
+            className={errors.workAuthDocId ? "error" : ""}
+            required={true}
+            />
+          </div>
+          {errors.workAuthDocId && (
+            <div className="inline-error-text">{errors.workAuthDocId}</div>
+          )}
+
+          <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="visaStartDate">Work Auth Start Date</label>
+              <input
+                type="date"
+                id="visaStartDate"
+                name="visaStartDate"
+                value={formData.visaStartDate}
+                onChange={onChange}
+                min="1900-01-01"
+              />
+              {errors.visaStartDate && (
+                <span className="error-message">{errors.visaStartDate}</span>
+              )}
+            </div>
+            <div className="form-group">
+              <label htmlFor="visaEndDate">Work Auth End Date</label>
+              <input
+                type="date"
+                id="visaEndDate"
+                name="visaEndDate"
+                value={formData.visaEndDate}
+                onChange={onChange}
+                min="1900-01-01"
+              />
+              {errors.visaEndDate && (
+                <span className="error-message">{errors.visaEndDate}</span>
+              )}
+            </div>
+          </div>
+        </>
+      )}
+
+      {formData.workAuthType === "F1 OPT" && (
         <div>
-          <FileUpload
+          <div className="file-action-row">
+            <FileUpload
             label="OPT Receipt"
             name="optReceipt"
             accept=".pdf,.jpg,.jpeg,.png"
@@ -96,14 +152,15 @@ const WorkAuthSection = ({
             onUploadError={(error) => onUploadError("optReceiptDocId", error)}
             className={errors.optReceiptDocId ? "error" : ""}
             required={true}
-          />
+            />
+          </div>
           {errors.optReceiptDocId && (
-            <span className="error-message">{errors.optReceiptDocId}</span>
+            <div className="inline-error-text">{errors.optReceiptDocId}</div>
           )}
         </div>
       )}
 
-      {formData.workAuthType === "Other" && (
+      {formData.isPrOrCitizen === "no" && formData.workAuthType === "Other" && (
         <div className="form-row">
           <div className="form-group">
             <label htmlFor="visaTitle">Visa Title</label>
@@ -112,26 +169,6 @@ const WorkAuthSection = ({
               id="visaTitle"
               name="visaTitle"
               value={formData.visaTitle}
-              onChange={onChange}
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="visaStartDate">Visa Start Date</label>
-            <input
-              type="date"
-              id="visaStartDate"
-              name="visaStartDate"
-              value={formData.visaStartDate}
-              onChange={onChange}
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="visaEndDate">Visa End Date</label>
-            <input
-              type="date"
-              id="visaEndDate"
-              name="visaEndDate"
-              value={formData.visaEndDate}
               onChange={onChange}
             />
           </div>

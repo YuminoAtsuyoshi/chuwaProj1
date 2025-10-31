@@ -4,7 +4,7 @@ const createDoc = async (req, res, next) => {
   try {
     if (req.file) {
       const doc = new Doc({
-        url: `http://localhost:3000/${req.file.filename}`,
+        url: `http://localhost:3000/fileStorage/${req.file.filename}`,
       });
       await doc.save();
       res.status(200).json(doc);

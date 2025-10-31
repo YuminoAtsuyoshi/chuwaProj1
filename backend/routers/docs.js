@@ -6,7 +6,7 @@ const { createDoc, getDoc } = require("../controllers/DocumentController.js");
 
 const authMiddleware = require("../middlewares/auth.js");
 
-router.post("/", authMiddleware, upload.single(), createDoc);
+router.post("/", authMiddleware, upload.single("file"), createDoc);
 router.get("/:docId", authMiddleware, getDoc);
 
 module.exports = router;

@@ -100,14 +100,14 @@ export const usePIEditing = ({
       let hasChanges = false;
       if (section === "name") {
         hasChanges =
-          tempData.firstName !== employeeInfo?.first_name ||
+          tempData.firstName !== employeeInfo?.firstName ||
           tempData.lastName !== employeeInfo?.lastName ||
           tempData.middleName !== employeeInfo?.middleName ||
           tempData.preferredName !== employeeInfo?.preferredName;
       } else if (section === "address") {
         hasChanges =
           tempData.addressBuilding !== employeeInfo?.addressBuilding ||
-          tempData.addressStreet !== employeeInfo?.addressDtreet ||
+          tempData.addressStreet !== employeeInfo?.addressStreet ||
           tempData.addressCity !== employeeInfo?.addressCity ||
           tempData.addressState !== employeeInfo?.addressState ||
           tempData.addressZip !== employeeInfo?.addressZip;

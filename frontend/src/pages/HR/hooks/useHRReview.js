@@ -104,7 +104,9 @@ export const useHRReview = () => {
   const isApproved = employee?.status === "approved";
 
   return {
+    employeeId,
     employee,
+    setEmployee,
     employeeInfo,
     loading,
     message,

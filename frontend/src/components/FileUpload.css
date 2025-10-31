@@ -10,6 +10,22 @@
   font-size: 14px;
 }
 
+/* Row wrapper for upload + remove button to avoid overlap with error text */
+.file-action-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* remove-file button styles removed */
+
+.inline-error-text {
+  margin-top: 8px;
+  color: #d32f2f;
+  font-size: 14px;
+}
+
 .required {
   color: #dc3545;
 }

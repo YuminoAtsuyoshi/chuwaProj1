@@ -3,12 +3,15 @@ import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { getEmployeerInfo, getDocumentUrl } from "../../api/auth";
 import { logout } from "../../store";
+import EmployeeNav from "../../components/EmployeeNav";
 import "./PersonalInformationPage.css";
 import { usePIEditing } from "./hooks/usePIEditing";
 import NameSection from "./components/pi/NameSection";
 import AddressSectionPI from "./components/pi/AddressSectionPI";
 import ContactSectionPI from "./components/pi/ContactSectionPI";
 import IdentitySectionPI from "./components/pi/IdentitySectionPI";
+import EmploymentSectionPI from "./components/pi/EmploymentSectionPI";
+import EmergencyContactsSectionPI from "./components/pi/EmergencyContactsSectionPI";
 
 const PersonalInformationPage = () => {
   const [employeeInfo, setEmployeeInfo] = useState(null);
@@ -119,6 +122,7 @@ const PersonalInformationPage = () => {
   if (loading) {
     return (
       <div className="personal-info-container">
+        <EmployeeNav active="pi" />
         <div className="loading">Loading...</div>
       </div>
     );
@@ -127,6 +131,7 @@ const PersonalInformationPage = () => {
   if (!employeeInfo) {
     return (
       <div className="personal-info-container">
+        <EmployeeNav active="pi" />
         <div className="no-data">
           <h2>No Personal Information Available</h2>
           <p>Please complete your onboarding application first.</p>
@@ -137,6 +142,7 @@ const PersonalInformationPage = () => {
 
   return (
     <div className="personal-info-container">
+      <EmployeeNav active="pi" />
       <div className="page-header">
         <h1>Personal Information</h1>
         <p>View and manage your personal information</p>
@@ -195,6 +201,12 @@ const PersonalInformationPage = () => {
         tempData={tempData}
         onChange={handleInputChange}
       />
+
+      {/* Employment (Visa) Section */}
+      <EmploymentSectionPI employeeInfo={employeeInfo} />
+
+      {/* Emergency Contacts Section */}
+      <EmergencyContactsSectionPI contacts={employeeInfo?.emergencyContact} />
 
       {/* Documents Section */}
       <div className="info-section">
@@ -260,16 +272,17 @@ const PersonalInformationPage = () => {
             </div>
           )}
 
-          {employeeInfo.optReceiptUpload && (
+          {/* Work Authorization Document */}
+          {employeeInfo.workAuthDoc && (
             <div className="document-item">
               <div className="document-info">
-                <span className="document-name">OPT Receipt</span>
-                <span className="document-type">Work Authorization</span>
+                <span className="document-name">Work Authorization</span>
+                <span className="document-type">Document</span>
               </div>
               <div className="document-actions">
                 <button
                   onClick={() =>
-                    handleDocumentPreview(employeeInfo.optReceiptUpload)
+                    handleDocumentPreview(employeeInfo.workAuthDoc)
                   }
                   className="preview-btn"
                 >
@@ -278,7 +291,36 @@ const PersonalInformationPage = () => {
                 <button
                   onClick={() =>
                     handleDocumentDownload(
-                      employeeInfo.optReceiptUpload,
+                      employeeInfo.workAuthDoc,
+                      "work-authorization"
+                    )
+                  }
+                  className="download-btn"
+                >
+                  Download
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* OPT Receipt Document (F1 OPT) */}
+          {employeeInfo.optReceipt && (
+            <div className="document-item">
+              <div className="document-info">
+                <span className="document-name">OPT Receipt</span>
+                <span className="document-type">Document</span>
+              </div>
+              <div className="document-actions">
+                <button
+                  onClick={() => handleDocumentPreview(employeeInfo.optReceipt)}
+                  className="preview-btn"
+                >
+                  Preview
+                </button>
+                <button
+                  onClick={() =>
+                    handleDocumentDownload(
+                      employeeInfo.optReceipt,
                       "opt-receipt"
                     )
                   }
@@ -292,7 +334,8 @@ const PersonalInformationPage = () => {
 
           {!employeeInfo.profilePicture &&
             !employeeInfo.driverLicense &&
-            !employeeInfo.optReceiptUpload && (
+            !employeeInfo.optReceipt &&
+            !employeeInfo.workAuthDoc && (
               <div className="no-documents">
                 <p>No documents uploaded.</p>
               </div>

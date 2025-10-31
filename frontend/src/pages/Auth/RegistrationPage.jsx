@@ -12,6 +12,7 @@ const RegistrationPage = () => {
     confirmPassword: "",
   });
   const [message, setMessage] = useState("");
+  const [registrationToken, setRegistrationToken] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -22,6 +23,7 @@ const RegistrationPage = () => {
       try {
         const { email } = decodeRegistrationToken(token);
         setFormData((prev) => ({ ...prev, email }));
+        setRegistrationToken(token);
       } catch (error) {
         setMessage("Registration token is invalid or expired.");
       }
@@ -77,9 +79,9 @@ const RegistrationPage = () => {
     try {
       const registrationData = {
         username: formData.username,
-        email: formData.email,
+        // email is determined by backend from registration token
         password: formData.password,
-        isHr: false,
+        token: registrationToken,
       };
 
       const response = await register(registrationData);
