@@ -16,15 +16,15 @@ const VisaManagementPage = () => {
   const [message, setMessage] = useState("");
   const user = useSelector((state) => state.user);
 
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      const data = await getEmployeeDetails(user._id);
-      setEmployee(data);
+    const fetchData = async () => {
       try {
-        const info = await getEmployeerInfo(user._id);
-        setEmployeeInfo(info);
-      } catch (_) {}
+        setLoading(true);
+        const data = await getEmployeeDetails(user._id);
+        setEmployee(data);
+        try {
+          const info = await getEmployeerInfo(user._id);
+          setEmployeeInfo(info);
+        } catch (_) {}
       
       // Fetch OPT documents
       try {
@@ -48,12 +48,12 @@ const VisaManagementPage = () => {
         });
         setOptDocs(docsByType);
       } catch (_) {}
-    } catch (error) {
-      console.error("Error fetching employee detail:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+      } catch (error) {
+        console.error("Error fetching employee detail:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
   useEffect(() => {
     if (user?._id) {
@@ -112,10 +112,10 @@ const VisaManagementPage = () => {
     <div className="visa-management-container">
       <EmployeeNav active="visa" />
       <div className="page-content">
-        <div className="page-header">
-          <h1>Visa Status Management</h1>
-          <p>Track and manage your OPT work authorization documents</p>
-        </div>
+      <div className="page-header">
+        <h1>Visa Status Management</h1>
+        <p>Track and manage your OPT work authorization documents</p>
+      </div>
         {message && (
           <div
             className={`message ${
@@ -125,12 +125,12 @@ const VisaManagementPage = () => {
             {message}
           </div>
         )}
-        {!isF1OPT ? (
-          <div className="no-data">
-            <h2>Not available for your current work authorization</h2>
-            <p>Only employees with F1 OPT can use this page.</p>
-          </div>
-        ) : (
+      {!isF1OPT ? (
+        <div className="no-data">
+          <h2>Not available for your current work authorization</h2>
+          <p>Only employees with F1 OPT can use this page.</p>
+        </div>
+      ) : (
           <div className="visa-cards-container">
             {documentSections.map((section) => {
               const SectionComponent = section.component;
@@ -147,11 +147,11 @@ const VisaManagementPage = () => {
                   prevDocType={section.prevDocType}
                   onUpdate={handleUpdate}
                   setMessage={setMessage}
-                />
+          />
               );
             })}
           </div>
-        )}
+      )}
       </div>
     </div>
   );

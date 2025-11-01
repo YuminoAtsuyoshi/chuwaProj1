@@ -1,17 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
+import { useForm } from 'react-hook-form';
 import { login, getEmployeeDetails } from '../../api/auth';
 import { loginSuccess } from '../../store';
 import './LoginPage.css';
 
 const LoginPage = () => {
-  const [formData, setFormData] = useState({
-    email: '',
-    password: ''
-  });
+  const { 
+    register, 
+    handleSubmit, 
+    formState: { errors, isSubmitting } 
+  } = useForm();
+  
   const [message, setMessage] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
@@ -26,21 +28,11 @@ const LoginPage = () => {
     }
   }, [location.state]);
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsLoading(true);
+  const onSubmit = async (data) => {
     setMessage('');
 
     try {
-      const response = await login(formData);
+      const response = await login(data);
       console.log('Login successful:', response);
       
       // Store token in localStorage
@@ -100,8 +92,6 @@ const LoginPage = () => {
     } catch (error) {
       console.error('Login error:', error);
       setMessage(`Login failed: ${error.message || 'Unknown error'}`);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -109,18 +99,24 @@ const LoginPage = () => {
     <div className="login-container">
       <div className="login-form">
         <h2>Login</h2>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit(onSubmit)}>
           <div className="form-group">
             <label htmlFor="email">Email:</label>
             <input
               type="email"
               id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleInputChange}
-              required
+              {...register('email', {
+                required: 'Email is required',
+                pattern: {
+                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                  message: 'Invalid email address'
+                }
+              })}
               placeholder="Enter your email"
             />
+            {errors.email && (
+              <span className="error-message">{errors.email.message}</span>
+            )}
           </div>
           
           <div className="form-group">
@@ -128,20 +124,26 @@ const LoginPage = () => {
             <input
               type="password"
               id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleInputChange}
-              required
+              {...register('password', {
+                required: 'Password is required',
+                minLength: {
+                  value: 6,
+                  message: 'Password must be at least 6 characters long'
+                }
+              })}
               placeholder="Enter your password"
             />
+            {errors.password && (
+              <span className="error-message">{errors.password.message}</span>
+            )}
           </div>
           
           <button 
             type="submit" 
             className="login-button"
-            disabled={isLoading}
+            disabled={isSubmitting}
           >
-            {isLoading ? 'Logging in...' : 'Login'}
+            {isSubmitting ? 'Logging in...' : 'Login'}
           </button>
         </form>
         

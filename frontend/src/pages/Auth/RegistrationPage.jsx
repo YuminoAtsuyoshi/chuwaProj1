@@ -1,28 +1,33 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { useForm } from "react-hook-form";
 import { register } from "../../api/auth";
 import { decodeRegistrationToken } from "../../utils/tokenUtils";
 import "./RegistrationPage.css";
 
 const RegistrationPage = () => {
-  const [formData, setFormData] = useState({
-    email: "",
-    username: "",
-    password: "",
-    confirmPassword: "",
-  });
+  const { 
+    register, 
+    handleSubmit, 
+    watch,
+    setValue,
+    formState: { errors, isSubmitting } 
+  } = useForm();
+  
   const [message, setMessage] = useState("");
   const [registrationToken, setRegistrationToken] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  
+  // Watch password for confirm password validation
+  const password = watch("password");
 
   useEffect(() => {
     const token = searchParams.get("token");
     if (token) {
       try {
         const { email } = decodeRegistrationToken(token);
-        setFormData((prev) => ({ ...prev, email }));
+        setValue("email", email); // Set email using react-hook-form setValue
         setRegistrationToken(token);
       } catch (error) {
         setMessage("Registration token is invalid or expired.");
@@ -30,57 +35,16 @@ const RegistrationPage = () => {
     } else {
       setMessage("Registration token missing or invalid.");
     }
-  }, [searchParams]);
+  }, [searchParams, setValue]);
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const validateForm = () => {
-    const { username, password, confirmPassword } = formData;
-
-    if (!username || !password || !confirmPassword) {
-      setMessage("All fields are required.");
-      return false;
-    }
-
-    if (username.length < 3) {
-      setMessage("Username must be at least 3 characters long.");
-      return false;
-    }
-
-    if (password.length < 6) {
-      setMessage("Password must be at least 6 characters long.");
-      return false;
-    }
-
-    if (password !== confirmPassword) {
-      setMessage("Passwords do not match.");
-      return false;
-    }
-
-    return true;
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const onSubmit = async (data) => {
     setMessage("");
-
-    if (!validateForm()) {
-      return;
-    }
-
-    setIsLoading(true);
 
     try {
       const registrationData = {
-        username: formData.username,
+        username: data.username,
         // email is determined by backend from registration token
-        password: formData.password,
+        password: data.password,
         token: registrationToken,
       };
 
@@ -95,8 +59,6 @@ const RegistrationPage = () => {
     } catch (error) {
       console.error("Registration error:", error);
       setMessage(`Registration failed: ${error.message || "Unknown error"}`);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -104,18 +66,22 @@ const RegistrationPage = () => {
     <div className="registration-container">
       <div className="registration-form">
         <h2>Employee Registration</h2>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit(onSubmit)}>
           <div className="form-group">
             <label htmlFor="email">Email:</label>
             <input
               type="email"
               id="email"
-              name="email"
-              value={formData.email}
+              {...register("email", {
+                required: "Email is required",
+              })}
               readOnly
               className="readonly-field"
               placeholder="Email from registration token"
             />
+            {errors.email && (
+              <span className="error-message">{errors.email.message}</span>
+            )}
           </div>
 
           <div className="form-group">
@@ -123,12 +89,18 @@ const RegistrationPage = () => {
             <input
               type="text"
               id="username"
-              name="username"
-              value={formData.username}
-              onChange={handleInputChange}
-              required
+              {...register("username", {
+                required: "Username is required",
+                minLength: {
+                  value: 3,
+                  message: "Username must be at least 3 characters long"
+                }
+              })}
               placeholder="Enter your username"
             />
+            {errors.username && (
+              <span className="error-message">{errors.username.message}</span>
+            )}
           </div>
 
           <div className="form-group">
@@ -136,12 +108,18 @@ const RegistrationPage = () => {
             <input
               type="password"
               id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleInputChange}
-              required
+              {...register("password", {
+                required: "Password is required",
+                minLength: {
+                  value: 6,
+                  message: "Password must be at least 6 characters long"
+                }
+              })}
               placeholder="Enter your password"
             />
+            {errors.password && (
+              <span className="error-message">{errors.password.message}</span>
+            )}
           </div>
 
           <div className="form-group">
@@ -149,20 +127,24 @@ const RegistrationPage = () => {
             <input
               type="password"
               id="confirmPassword"
-              name="confirmPassword"
-              value={formData.confirmPassword}
-              onChange={handleInputChange}
-              required
+              {...register("confirmPassword", {
+                required: "Please confirm your password",
+                validate: (value) =>
+                  value === password || "Passwords do not match"
+              })}
               placeholder="Confirm your password"
             />
+            {errors.confirmPassword && (
+              <span className="error-message">{errors.confirmPassword.message}</span>
+            )}
           </div>
 
           <button
             type="submit"
             className="register-button"
-            disabled={isLoading}
+            disabled={isSubmitting}
           >
-            {isLoading ? "Registering..." : "Register"}
+            {isSubmitting ? "Registering..." : "Register"}
           </button>
         </form>
 
