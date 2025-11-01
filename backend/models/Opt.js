@@ -13,6 +13,14 @@ const optSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Employee",
   },
+  status: {
+    type: String,
+    enum: ["pending", "approved", "rejected"],
+    default: "pending",
+  },
+  feedback: {
+    type: String,
+  },
   createdAt: {
     type: Date,
     default: Date.now,

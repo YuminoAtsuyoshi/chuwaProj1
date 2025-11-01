@@ -38,7 +38,7 @@ const HREmployeeListPage = () => {
                 lastName: "Doe",
                 preferredName: "Johnny",
                 ssn: "123-45-6789",
-                visa: "F1(CPT/OPT)",
+                visa: "F1 OPT",
                 cellPhone: "555-123-4567",
               },
             },
@@ -168,8 +168,8 @@ const HREmployeeListPage = () => {
           .join(" ")
       : emp.username || "N/A";
   const getWorkAuthTitle = (emp) => {
-    if (!emp.employeeInfo) return "N/A";
-    const { isPrOrCitizen, prOrCitizenType, workAuthType } = emp.employeeInfo;
+    if (!emp.personInfo) return "N/A";
+    const { isPrOrCitizen, prOrCitizenType, workAuthType } = emp.personInfo;
     return isPrOrCitizen === "yes"
       ? prOrCitizenType || "Citizen/Permanent Resident"
       : isPrOrCitizen === "no"
@@ -187,70 +187,74 @@ const HREmployeeListPage = () => {
   return (
     <div className="hr-profiles-container">
       <HRNav active="profiles" />
-      <div className="page-header">
-        <h1>Employee Profiles</h1>
-        <p>View and manage employee profiles</p>
-      </div>
+      <div className="page-content">
+        <div className="page-header">
+          <h1>Employee Profiles</h1>
+          <p>Total Employees: {displayedEmployees.length}</p>
+        </div>
 
-      <div className="search-section">
-        <input
-          type="text"
-          placeholder="Search by username, email, or name..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="search-input"
-        />
-        {searchMessage && (
-          <div
-            className={`search-message ${
-              searchMessage.includes("One") ? "single" : ""
-            }`}
-          >
-            {searchMessage}
+        <div className="search-section">
+          <div className="search-input-wrapper">
+            <input
+              type="text"
+              placeholder="Search by first name, last name, or preferred name..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="search-input"
+            />
           </div>
-        )}
-      </div>
+          {searchMessage && (
+            <div
+              className={`search-message ${
+                searchMessage.includes("One") ? "single" : ""
+              }`}
+            >
+              {searchMessage}
+            </div>
+          )}
+        </div>
 
-      <div className="table-container">
-        <table className="employee-table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>SSN</th>
-              <th>Work Authorization Title</th>
-              <th>Phone Number</th>
-              <th>Email</th>
-            </tr>
-          </thead>
-          <tbody>
-            {displayedEmployees.length === 0 ? (
+        <div className="table-container">
+          <table className="employee-table">
+            <thead>
               <tr>
-                <td colSpan="5" className="no-data">
-                  {searchTerm
-                    ? "No employees found matching your search."
-                    : "No employees found."}
-                </td>
+                <th>Name</th>
+                <th>SSN</th>
+                <th>Work Authorization</th>
+                <th>Phone</th>
+                <th>Email</th>
               </tr>
-            ) : (
-              displayedEmployees.map((emp) => (
-                <tr key={emp._id}>
-                  <td>
-                    <button
-                      onClick={() => handleProfileClick(emp._id)}
-                      className="profile-link"
-                    >
-                      {getFullName(emp)}
-                    </button>
+            </thead>
+            <tbody>
+              {displayedEmployees.length === 0 ? (
+                <tr>
+                  <td colSpan="5" className="no-data">
+                    {searchTerm
+                      ? "No employees found matching your search."
+                      : "No employees found."}
                   </td>
-                  <td>{emp.personInfo?.ssn || "N/A"}</td>
-                  <td>{getWorkAuthTitle(emp)}</td>
-                  <td>{emp.personInfo?.cellPhone || "N/A"}</td>
-                  <td>{emp.email || "N/A"}</td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+              ) : (
+                displayedEmployees.map((emp) => (
+                  <tr key={emp._id}>
+                    <td>
+                      <button
+                        onClick={() => handleProfileClick(emp._id)}
+                        className="profile-link"
+                      >
+                        {getFullName(emp)}
+                      </button>
+                    </td>
+                    <td>{emp.personInfo?.ssn || "N/A"}</td>
+                    <td>{getWorkAuthTitle(emp)}</td>
+                    <td>{emp.personInfo?.cellPhone || "N/A"}</td>
+                    <td>{emp.email || "N/A"}</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

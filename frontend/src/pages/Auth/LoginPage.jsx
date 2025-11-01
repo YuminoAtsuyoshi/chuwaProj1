@@ -54,21 +54,42 @@ const LoginPage = () => {
       if (employeeId) {
         const employeeData = await getEmployeeDetails(employeeId);
         console.log('Employee data:', employeeData);
+        console.log('Stage:', employeeData.stage, 'Status:', employeeData.status);
         
         // Store user data in Redux store
         dispatch(loginSuccess(token, employeeData));
         
         // Redirect based on user role and status
         if (employeeData.isHr) {
+          console.log('Redirecting HR to dashboard');
           navigate('/hr/dashboard');
         } else {
           // Check employee stage and status
-          if (employeeData.stage === 'onboarding' && employeeData.status === 'approved') {
-            navigate('/employee/dashboard');
-          } else if (employeeData.stage === 'onboarding' && 
-              (employeeData.status === 'never_submit' || employeeData.status === 'rejected')) {
+          // According to requirements:
+          // - never_submit: fill in the application fields and submit for the first time
+          // - rejected: view feedback on why their application was rejected, make changes, and resubmit
+          // - pending: view submitted application (not editable) and wait for HR review
+          // - approved: redirect to dashboard
+          // 
+          // IMPORTANT: If status is 'rejected', always redirect to onboarding page regardless of stage
+          // This allows employees to view feedback and resubmit their application
+          if (employeeData.status === 'rejected') {
+            console.log('Redirecting to onboarding page (status: rejected, stage:', employeeData.stage, ')');
             navigate('/employee/onboarding');
+          } else if (employeeData.stage === 'onboarding') {
+            // For onboarding stage: redirect to onboarding page if never_submit or pending
+            if (employeeData.status === 'never_submit' || 
+                employeeData.status === 'pending') {
+              console.log('Redirecting to onboarding page (stage: onboarding, status:', employeeData.status, ')');
+              navigate('/employee/onboarding');
+            } else {
+              // approved or other status -> go to dashboard
+              console.log('Redirecting to dashboard (stage:', employeeData.stage, ', status:', employeeData.status, ')');
+              navigate('/employee/dashboard');
+            }
           } else {
+            // Not in onboarding stage and not rejected -> go to dashboard
+            console.log('Redirecting to dashboard (not onboarding stage, status:', employeeData.status, ')');
             navigate('/employee/dashboard');
           }
         }

@@ -23,12 +23,36 @@ const createOpt = async (req, res, next) => {
       doc: req.body.doc,
       employeeId: req.body.employee_id,
     });
-    opt.save();
+    await opt.save();
+    
     // Add to Employee
-    const newEmployee = await Employee.updateOne(
+    await Employee.updateOne(
       { _id: req.body.employee_id },
       { $push: { optList: opt._id } }
     );
+    
+    // Auto-update employee status based on document type
+    // Set status to pending when employee uploads a document for their current or next stage
+    // Define the stage for each document type
+    const documentStageMap = {
+      "OPT Receipt": ["onboarding", "OPT Receipt"],
+      "OPT EAD": ["OPT Receipt", "OPT EAD"],
+      "I-983": ["OPT EAD", "I-983"],
+      "I-20": ["I-983", "I-20"]
+    };
+    
+    const allowedStages = documentStageMap[req.body.type];
+    console.log(`createOpt: type=${req.body.type}, employee.stage=${employee.stage}, employee.status=${employee.status}, allowedStages=${JSON.stringify(allowedStages)}`);
+    if (allowedStages && allowedStages.includes(employee.stage)) {
+      console.log(`createOpt: Setting status to pending for employee ${req.body.employee_id}`);
+      await Employee.updateOne(
+        { _id: req.body.employee_id },
+        { $set: { status: "pending", submissionDate: new Date().toISOString().slice(0, 10) } }
+      );
+    } else {
+      console.log(`createOpt: NOT updating status - stage not in allowed list or allowedStages is null`);
+    }
+    
     res.status(200).json(opt);
   } catch (err) {
     err.statusCode = 500;

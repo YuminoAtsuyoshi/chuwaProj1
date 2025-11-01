@@ -156,6 +156,21 @@
   text-transform: uppercase;
 }
 
+.status-approved {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.status-rejected {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.status-pending {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
 .status-valid {
   background-color: #d4edda;
   color: #155724;
@@ -185,11 +200,13 @@
 .reject-btn {
   padding: 8px 16px;
   border: none;
-  border-radius: 6px;
+  border-radius: 5px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
-  transition: background-color 0.3s ease;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  min-width: 80px;
 }
 
 .approve-btn {
@@ -199,6 +216,8 @@
 
 .approve-btn:hover:not(:disabled) {
   background-color: #218838;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(40, 167, 69, 0.3);
 }
 
 .reject-btn {
@@ -208,28 +227,37 @@
 
 .reject-btn:hover:not(:disabled) {
   background-color: #c82333;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(220, 53, 69, 0.3);
 }
 
 .approve-btn:disabled,
 .reject-btn:disabled {
   background-color: #6c757d;
   cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 .view-btn {
   padding: 8px 16px;
   border: none;
-  border-radius: 6px;
+  border-radius: 5px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
-  transition: background-color 0.3s ease;
+  transition: all 0.2s ease;
   background-color: #007bff;
   color: white;
+  white-space: nowrap;
+  width: 100%;
+  margin-bottom: 4px;
 }
 
 .view-btn:hover {
   background-color: #0056b3;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 123, 255, 0.3);
 }
 
 .registration-link {
@@ -394,4 +422,457 @@
   .modal-content h3 {
     font-size: 20px;
   }
+}
+
+/* Search Section Styles */
+.search-section {
+  margin-bottom: 20px;
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-radius: 5px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 10px 15px;
+  font-size: 16px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #4a90e2;
+  box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+}
+
+.search-message {
+  font-size: 14px;
+  color: #666;
+  padding: 5px 0;
+}
+
+.search-message.single {
+  color: #28a745;
+  font-weight: 500;
+}
+
+/* Action Cell Container - For organizing buttons in table cells */
+.action-cell-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 200px;
+}
+
+.action-buttons-row {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-start;
+}
+
+/* Document List Styles */
+.document-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.document-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  border: 1px solid #e9ecef;
+  gap: 12px;
+}
+
+.document-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+}
+
+.document-name {
+  font-weight: 500;
+  color: #333;
+  font-size: 14px;
+}
+
+.document-type {
+  font-size: 11px;
+  color: #666;
+  background-color: #e9ecef;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.document-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.preview-btn,
+.download-btn {
+  padding: 8px 14px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  min-width: 75px;
+}
+
+.preview-btn {
+  background-color: #007bff;
+  color: white;
+}
+
+.preview-btn:hover {
+  background-color: #0056b3;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 123, 255, 0.3);
+}
+
+.download-btn {
+  background-color: #28a745;
+  color: white;
+}
+
+.download-btn:hover {
+  background-color: #218838;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(40, 167, 69, 0.3);
+}
+
+.no-document {
+  color: #6c757d;
+  font-style: italic;
+  font-size: 14px;
+  padding: 8px 0;
+}
+
+/* Table cell alignment for action column */
+.data-table td:last-child {
+  vertical-align: top;
+  padding-top: 16px;
+}
+
+/* No document message for action cell */
+.no-document-message {
+  color: #6c757d;
+  font-style: italic;
+  font-size: 14px;
+  padding: 10px;
+  text-align: center;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+  margin-bottom: 10px;
+}
+
+/* Tabs Styles */
+.tabs-container {
+  margin-top: 20px;
+}
+
+.tabs-list {
+  display: flex;
+  gap: 8px;
+  border-bottom: 2px solid #e0e0e0;
+  margin-bottom: 24px;
+}
+
+.tab-trigger {
+  padding: 12px 24px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+  color: #666;
+  transition: all 0.2s ease;
+  margin-bottom: -2px;
+}
+
+.tab-trigger:hover {
+  color: #007bff;
+}
+
+.tab-trigger.active {
+  color: #007bff;
+  border-bottom-color: #007bff;
+  font-weight: 600;
+}
+
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+/* HR Card Styles */
+.hr-visa-card {
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  margin-bottom: 20px;
+  padding: 24px;
+  transition: box-shadow 0.2s ease;
+}
+
+.hr-visa-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.hr-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 24px;
+  margin-bottom: 20px;
+}
+
+.hr-card-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.hr-card-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.hr-card-value {
+  font-size: 15px;
+  font-weight: 500;
+  color: #333;
+  line-height: 1.5;
+}
+
+.hr-card-value.muted {
+  font-size: 13px;
+  color: #666;
+}
+
+/* Search Bar Styles */
+.search-wrapper {
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.search-wrapper input {
+  width: 100%;
+  padding: 12px 16px 12px 40px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: border-color 0.2s ease;
+}
+
+.search-wrapper input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  color: #666;
+}
+
+/* Approved Documents List - simplified style */
+.approved-docs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.approved-doc-item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  align-items: center;
+}
+
+.approved-doc-item > div:first-child {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.approved-doc-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.approved-doc-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+.approved-doc-date {
+  font-size: 12px;
+  color: #666;
+}
+
+.preview-btn-approved {
+  padding: 8px 16px;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.3s ease;
+  background-color: white;
+  color: #000;
+  white-space: nowrap;
+}
+
+.preview-btn-approved:hover:not(:disabled) {
+  background-color: #f8f9fa;
+}
+
+/* Token Onboard Form Style for Action Cell */
+/* Document Item Review */
+.document-item-review {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.document-info-review {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.document-name-review {
+  font-weight: 500;
+  color: #333;
+  font-size: 16px;
+}
+
+.document-status-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.document-status-badge.status-pending {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.document-status-badge.status-approved {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.document-status-badge.status-rejected {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+/* Vertical Action Buttons (matching HROnboardingReviewPage.css) */
+.document-actions-vertical {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Preview button - white background, black text */
+.preview-btn-review {
+  padding: 8px 16px;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.3s ease;
+  width: 100%;
+  background-color: white;
+  color: #000;
+}
+
+.preview-btn-review:hover:not(:disabled) {
+  background-color: #f8f9fa;
+}
+
+/* Approve button - blue */
+.approve-btn-review {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.3s ease;
+  width: 100%;
+  background-color: #007bff;
+  color: white;
+}
+
+.approve-btn-review:hover:not(:disabled) {
+  background-color: #0056b3;
+}
+
+/* Reject button - red */
+.reject-btn-review {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.3s ease;
+  width: 100%;
+  background-color: #dc3545;
+  color: white;
+}
+
+.reject-btn-review:hover:not(:disabled) {
+  background-color: #c82333;
+}
+
+.preview-btn-review:disabled,
+.approve-btn-review:disabled,
+.reject-btn-review:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+}
+
+/* Action Buttons Vertical for Onboarding Stage */
+.action-buttons-vertical {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 15px;
 }

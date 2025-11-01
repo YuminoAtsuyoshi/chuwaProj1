@@ -19,6 +19,7 @@ const HRHiringManagementPage = () => {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [processing, setProcessing] = useState(false);
+  const [activeTab, setActiveTab] = useState("tokens"); // "tokens" or "onboarding"
 
   const user = useSelector((state) => state.user);
   const navigate = useNavigate();
@@ -41,23 +42,36 @@ const HRHiringManagementPage = () => {
     const testUser = localStorage.getItem("testUser");
     if (testUser) {
       try {
-        // Mock registration tokens
+        // Mock registration tokens - create realistic dates
+        const now = new Date();
+        const expiredDate = new Date(now.getTime() - 24 * 60 * 60 * 1000); // 1 day ago
+        const futureDate = new Date(now.getTime() + 3 * 60 * 60 * 1000); // 3 hours from now
+        const oldDate = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000); // 2 days ago
+        
         const mockTokens = [
           {
             _id: "1",
             email: "newuser1@example.com",
             token: "abc123xyz",
-            createdAt: "2024-01-15T10:00:00Z",
-            expiresAt: "2024-02-15T10:00:00Z",
+            createdAt: oldDate.toISOString(),
+            expiresAt: expiredDate.toISOString(),
             status: "valid",
           },
           {
             _id: "2",
             email: "newuser2@example.com",
             token: "def456uvw",
-            createdAt: "2024-01-10T08:00:00Z",
-            expiresAt: "2024-02-10T08:00:00Z",
+            createdAt: oldDate.toISOString(),
+            expiresAt: expiredDate.toISOString(),
             status: "expired",
+          },
+          {
+            _id: "3",
+            email: "pending@example.com",
+            token: "pending123",
+            createdAt: now.toISOString(),
+            expiresAt: futureDate.toISOString(),
+            status: "valid",
           },
         ];
 
@@ -151,7 +165,6 @@ const HRHiringManagementPage = () => {
         getAllEmployees().then((data) =>
           data.filter(
             (emp) =>
-              emp.stage === "onboarding" &&
               emp.status === "rejected" &&
               !emp.isHr
           )
@@ -244,16 +257,76 @@ const HRHiringManagementPage = () => {
     }
   };
 
+  const formatDateTime = (dateString) => {
+    if (!dateString) return "N/A";
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return "N/A";
+      return date.toLocaleString("en-US", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      });
+    } catch (_) {
+      return "N/A";
+    }
+  };
+
+  const getTimeRemaining = (expiresAt) => {
+    if (!expiresAt) return { text: "N/A", expired: true };
+    try {
+      const expiryDate = new Date(expiresAt);
+      const now = new Date();
+      if (expiryDate < now) {
+        return { text: "Expired", expired: true };
+      }
+      const diffMs = expiryDate - now;
+      const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+      const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+      return { 
+        text: `${diffHours}h ${diffMinutes}m`, 
+        expired: false 
+      };
+    } catch (_) {
+      return { text: "N/A", expired: true };
+    }
+  };
+
+  const getTokenStatus = (token, isUsed) => {
+    const timeRemaining = getTimeRemaining(token.expiresAt);
+    if (isUsed) return { text: "Submitted", color: "green" };
+    if (timeRemaining.expired) return { text: "Expired", color: "grey" };
+    return { text: "Pending", color: "orange" };
+  };
+
   const getFullName = (emp) => {
-    if (emp.employeerInfo) {
+    if (emp.personInfo) {
       const parts = [
-        emp.employeerInfo.firstName,
-        emp.employeerInfo.middleName,
-        emp.employeerInfo.lastName,
+        emp.personInfo.firstName,
+        emp.personInfo.middleName,
+        emp.personInfo.lastName,
       ].filter(Boolean);
       return parts.join(" ");
     }
     return emp.email || "N/A";
+  };
+
+  // Get employee name from token email
+  const getTokenEmployeeName = (tokenEmail) => {
+    // Try to find employee in applications by email
+    const allApplications = [
+      ...pendingApplications,
+      ...rejectedApplications,
+      ...approvedApplications,
+    ];
+    const emp = allApplications.find((e) => e.email === tokenEmail);
+    if (emp) {
+      return getFullName(emp);
+    }
+    return "N/A";
   };
 
   // Check if token has been used (employee registered)
@@ -267,8 +340,12 @@ const HRHiringManagementPage = () => {
     return allApplications.some((emp) => emp.email === tokenEmail);
   };
 
-  const handleViewApplication = (employeeId) => {
-    const url = `/hr/review-onboarding/${employeeId}`;
+  const handleViewApplication = (employeeId, stage) => {
+    // If stage is onboarding, go to onboarding review page
+    // Otherwise, go to employee detail page (which shows all stages)
+    const url = stage === "onboarding" 
+      ? `/hr/review-onboarding/${employeeId}`
+      : `/hr/employee-profile/${employeeId}`;
     window.open(url, "_blank");
   };
 
@@ -283,257 +360,302 @@ const HRHiringManagementPage = () => {
   return (
     <div className="hiring-management-container">
       <HRNav active="hiring" />
-      <div className="page-header">
-        <h1>Hiring Management</h1>
-        <p>Manage registration tokens and review pending applications</p>
-      </div>
-
-      {message && (
-        <div
-          className={`message ${
-            message.includes("successfully") ? "success" : "error"
-          }`}
-        >
-          {message}
+      <div className="page-content">
+        <div className="page-header">
+          <h1>Hiring Management</h1>
+          <p>Generate registration tokens and manage employee onboarding</p>
         </div>
-      )}
 
-      {/* Registration Token Management Section */}
-      <div className="section">
-        <div className="section-header">
-          <h2>🔑 Registration Token Management</h2>
-          <button
-            onClick={() => setShowModal(true)}
-            className="generate-btn"
-            disabled={processing}
+        {message && (
+          <div
+            className={`message ${
+              message.includes("successfully") ? "success" : "error"
+            }`}
           >
-            Generate Token
+            {message}
+          </div>
+        )}
+
+        {/* Tabs */}
+        <div className="page-tabs">
+          <button
+            className={`tab-button ${activeTab === "tokens" ? "active" : ""}`}
+            onClick={() => setActiveTab("tokens")}
+          >
+            Registration Tokens
+          </button>
+          <button
+            className={`tab-button ${activeTab === "onboarding" ? "active" : ""}`}
+            onClick={() => setActiveTab("onboarding")}
+          >
+            Onboarding Applications
           </button>
         </div>
 
-        {tokens.length === 0 ? (
-          <div className="no-data">
-            <p>No registration tokens found.</p>
+        {/* Registration Tokens Tab */}
+        {activeTab === "tokens" && (
+          <>
+            {/* Registration Token Card */}
+            <div className="token-card">
+              <div className="token-card-content">
+                <div className="token-card-text">
+                  <h3>Registration Token</h3>
+                  <p>Generate a registration token valid for 3 hours</p>
+                </div>
+                <button
+                  onClick={() => setShowModal(true)}
+                  className="generate-token-btn"
+                  disabled={processing}
+                >
+                  <span className="btn-icon">✉</span>
+                  Generate Token and Send Email
+                </button>
+              </div>
+            </div>
+
+            {/* Registration Token History */}
+            <div className="section">
+              <h2 className="section-title">Registration Token History</h2>
+
+              {tokens.length === 0 ? (
+                <div className="no-data">
+                  <p>No registration tokens found.</p>
+                </div>
+              ) : (
+                <div className="table-container">
+                  <table className="data-table">
+                    <thead>
+                      <tr>
+                        <th>Email Address</th>
+                        <th>Name</th>
+                        <th>Registration Link</th>
+                        <th>Created At</th>
+                        <th>Expires At</th>
+                        <th>Time Remaining</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {tokens.map((token) => {
+                        const registrationLink = `${window.location.origin}/register?token=${token.token}`;
+                        const isUsed = isTokenUsed(token.email);
+                        const statusInfo = getTokenStatus(token, isUsed);
+                        const timeRemaining = getTimeRemaining(token.expiresAt);
+                        
+                        return (
+                          <tr key={token._id}>
+                            <td>{token.email}</td>
+                            <td>{getTokenEmployeeName(token.email)}</td>
+                            <td>
+                              <div className="registration-link-cell">
+                                <a
+                                  href={registrationLink}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="registration-link"
+                                >
+                                  {registrationLink.substring(0, 30)}...
+                                </a>
+                              </div>
+                            </td>
+                            <td>{formatDateTime(token.createdAt)}</td>
+                            <td>{formatDateTime(token.expiresAt)}</td>
+                            <td className={timeRemaining.expired ? "expired-time" : ""}>
+                              {timeRemaining.text}
+                            </td>
+                            <td>
+                              <span
+                                className={`status-badge status-${statusInfo.color}`}
+                              >
+                                {statusInfo.text}
+                              </span>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </>
+        )}
+
+        {/* Onboarding Applications Tab */}
+        {activeTab === "onboarding" && (
+          <div className="applications-section">
+            {/* Pending Applications */}
+            <div className="section">
+              <div className="section-header">
+                <h2 className="section-title">Pending Applications</h2>
+              </div>
+
+              {pendingApplications.length === 0 ? (
+                <div className="no-data">
+                  <p>No pending applications at this time.</p>
+                </div>
+              ) : (
+                <div className="table-container">
+                  <table className="data-table">
+                    <thead>
+                      <tr>
+                        <th>Full Name</th>
+                        <th>Email</th>
+                        <th>Submission Date</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {pendingApplications.map((app) => (
+                        <tr key={app._id}>
+                          <td>{getFullName(app)}</td>
+                          <td>{app.email}</td>
+                          <td>{formatDate(app.submissionDate)}</td>
+                          <td>
+                            <button
+                              onClick={() => handleViewApplication(app._id, app.stage || "onboarding")}
+                              className="view-btn"
+                            >
+                              View Application
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+
+            {/* Rejected Applications */}
+            <div className="section">
+              <div className="section-header">
+                <h2 className="section-title">Rejected Applications</h2>
+              </div>
+
+              {rejectedApplications.length === 0 ? (
+                <div className="no-data">
+                  <p>No rejected applications.</p>
+                </div>
+              ) : (
+                <div className="table-container">
+                  <table className="data-table">
+                    <thead>
+                      <tr>
+                        <th>Full Name</th>
+                        <th>Email</th>
+                        <th>Stage</th>
+                        <th>Submission Date</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {rejectedApplications.map((app) => (
+                        <tr key={app._id}>
+                          <td>{getFullName(app)}</td>
+                          <td>{app.email}</td>
+                          <td>{app.stage || "N/A"}</td>
+                          <td>{formatDate(app.submissionDate)}</td>
+                          <td>
+                            <button
+                              onClick={() => handleViewApplication(app._id, app.stage)}
+                              className="view-btn"
+                            >
+                              View {app.stage === "onboarding" ? "Application" : "Details"}
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+
+            {/* Approved Applications */}
+            <div className="section">
+              <div className="section-header">
+                <h2 className="section-title">Approved Applications</h2>
+              </div>
+
+              {approvedApplications.length === 0 ? (
+                <div className="no-data">
+                  <p>No approved applications.</p>
+                </div>
+              ) : (
+                <div className="table-container">
+                  <table className="data-table">
+                    <thead>
+                      <tr>
+                        <th>Full Name</th>
+                        <th>Email</th>
+                        <th>Submission Date</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {approvedApplications.map((app) => (
+                        <tr key={app._id}>
+                          <td>{getFullName(app)}</td>
+                          <td>{app.email}</td>
+                          <td>{formatDate(app.submissionDate)}</td>
+                          <td>
+                            <button
+                              onClick={() => handleViewApplication(app._id, app.stage || "onboarding")}
+                              className="view-btn"
+                            >
+                              View Application
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
           </div>
-        ) : (
-          <div className="table-container">
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>Email Address</th>
-                  <th>Registration Link</th>
-                  <th>Created At</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {tokens.map((token) => {
-                  const registrationLink = `${window.location.origin}/register?token=${token.token}`;
-                  const tokenStatus = isTokenUsed(token.email)
-                    ? "Submitted"
-                    : "Not Submitted";
-                  return (
-                    <tr key={token._id}>
-                      <td>{token.email}</td>
-                      <td>
-                        <a
-                          href={registrationLink}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="registration-link"
-                        >
-                          {registrationLink}
-                        </a>
-                      </td>
-                      <td>{formatDate(token.createdAt)}</td>
-                      <td>
-                        <span
-                          className={`status-badge status-${tokenStatus
-                            .toLowerCase()
-                            .replace(" ", "-")}`}
-                        >
-                          {tokenStatus}
-                        </span>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+        )}
+
+        {/* Generate Token Modal */}
+        {showModal && (
+          <div
+            className="modal-overlay"
+            onClick={() => !processing && setShowModal(false)}
+          >
+            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+              <h3>Generate Registration Token</h3>
+              <div className="modal-body">
+                <label htmlFor="email">Email Address:</label>
+                <input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter invitee's email"
+                  disabled={processing}
+                />
+              </div>
+              <div className="modal-footer">
+                <button
+                  onClick={handleGenerateToken}
+                  className="generate-btn"
+                  disabled={processing || !email}
+                >
+                  {processing ? "Generating..." : "Generate"}
+                </button>
+                <button
+                  onClick={() => setShowModal(false)}
+                  className="cancel-btn"
+                  disabled={processing}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>
-
-      {/* Application Reviews Section */}
-      <div className="applications-section">
-        {/* Pending Applications */}
-        <div className="section">
-          <div className="section-header">
-            <h2>📥 Pending Applications</h2>
-          </div>
-
-          {pendingApplications.length === 0 ? (
-            <div className="no-data">
-              <p>No pending applications at this time.</p>
-            </div>
-          ) : (
-            <div className="table-container">
-              <table className="data-table">
-                <thead>
-                  <tr>
-                    <th>Full Name</th>
-                    <th>Email</th>
-                    <th>Submission Date</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {pendingApplications.map((app) => (
-                    <tr key={app._id}>
-                      <td>{getFullName(app)}</td>
-                      <td>{app.email}</td>
-                      <td>{formatDate(app.submissionDate)}</td>
-                      <td>
-                        <button
-                          onClick={() => handleViewApplication(app._id)}
-                          className="view-btn"
-                        >
-                          View Application
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-
-        {/* Rejected Applications */}
-        <div className="section">
-          <div className="section-header">
-            <h2>❌ Rejected Applications</h2>
-          </div>
-
-          {rejectedApplications.length === 0 ? (
-            <div className="no-data">
-              <p>No rejected applications.</p>
-            </div>
-          ) : (
-            <div className="table-container">
-              <table className="data-table">
-                <thead>
-                  <tr>
-                    <th>Full Name</th>
-                    <th>Email</th>
-                    <th>Submission Date</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {rejectedApplications.map((app) => (
-                    <tr key={app._id}>
-                      <td>{getFullName(app)}</td>
-                      <td>{app.email}</td>
-                      <td>{formatDate(app.submissionDate)}</td>
-                      <td>
-                        <button
-                          onClick={() => handleViewApplication(app._id)}
-                          className="view-btn"
-                        >
-                          View Application
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-
-        {/* Approved Applications */}
-        <div className="section">
-          <div className="section-header">
-            <h2>✅ Approved Applications</h2>
-          </div>
-
-          {approvedApplications.length === 0 ? (
-            <div className="no-data">
-              <p>No approved applications.</p>
-            </div>
-          ) : (
-            <div className="table-container">
-              <table className="data-table">
-                <thead>
-                  <tr>
-                    <th>Full Name</th>
-                    <th>Email</th>
-                    <th>Submission Date</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {approvedApplications.map((app) => (
-                    <tr key={app._id}>
-                      <td>{getFullName(app)}</td>
-                      <td>{app.email}</td>
-                      <td>{formatDate(app.submissionDate)}</td>
-                      <td>
-                        <button
-                          onClick={() => handleViewApplication(app._id)}
-                          className="view-btn"
-                        >
-                          View Application
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Generate Token Modal */}
-      {showModal && (
-        <div
-          className="modal-overlay"
-          onClick={() => !processing && setShowModal(false)}
-        >
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <h3>Generate Registration Token</h3>
-            <div className="modal-body">
-              <label htmlFor="email">Email Address:</label>
-              <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter invitee's email"
-                disabled={processing}
-              />
-            </div>
-            <div className="modal-footer">
-              <button
-                onClick={handleGenerateToken}
-                className="generate-btn"
-                disabled={processing || !email}
-              >
-                {processing ? "Generating..." : "Generate"}
-              </button>
-              <button
-                onClick={() => setShowModal(false)}
-                className="cancel-btn"
-                disabled={processing}
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

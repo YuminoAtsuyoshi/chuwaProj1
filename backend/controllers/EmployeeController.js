@@ -161,25 +161,114 @@ const unlinkOpt = async (req, res, next) => {
 
 const makeDecision = async (req, res, next) => {
   try {
+    console.log(`makeDecision: START - employeeId=${req.params?.employeeId}, decision=${req.body.decision}`);
+    
+    // Check if documentType is provided to determine if this is a document-level decision
+    const { decision, documentType, feedback } = req.body;
+    
     const employee = await Employee.findById(req.params?.employeeId);
-    const decision = req.body.decision;
-    if (employee.status === "approved") {
-      const err = new Error("This stage has been approved");
-      err.statusCode = 500;
+    if (!employee) {
+      console.log(`makeDecision: ERROR - Employee not found: ${req.params?.employeeId}`);
+      const err = new Error("Employee not found");
+      err.statusCode = 404;
       next(err);
       return;
     }
+    
+    // If documentType is provided, this is a document-level approval/rejection
+    if (documentType) {
+      console.log(`makeDecision: Document-level decision for type=${documentType}`);
+      
+      // Find the OPT document for this employee and type
+      const optDoc = await Opt.findOne({
+        employeeId: req.params?.employeeId,
+        type: documentType
+      }).sort({ createdAt: -1 }); // Get the latest document of this type
+      
+      if (!optDoc) {
+        console.log(`makeDecision: ERROR - ${documentType} document not found`);
+        const err = new Error(`${documentType} document not found`);
+        err.statusCode = 404;
+        next(err);
+        return;
+      }
+      
+      if (optDoc.status === "approved" && decision === "approved") {
+        console.log(`makeDecision: ERROR - ${documentType} has been approved`);
+        const err = new Error(`${documentType} has already been approved`);
+        err.statusCode = 400;
+        next(err);
+        return;
+      }
+      
+      // Update the document status
+      optDoc.status = decision;
+      if (decision === "rejected" && feedback) {
+        optDoc.feedback = feedback;
+      }
+      await optDoc.save();
+      
+      console.log(`makeDecision: Updated ${documentType} status to ${decision}`);
+      
+      // If the document is approved, check if it's the current stage document
+      // and if so, advance the employee's stage and status
+      if (decision === "approved") {
+        const stageOrder = ["onboarding", "OPT Receipt", "OPT EAD", "I-983", "I-20"];
+        const employeeStageIndex = stageOrder.indexOf(employee.stage);
+        const docStageIndex = stageOrder.indexOf(documentType);
+        
+        console.log(`makeDecision: employeeStageIndex=${employeeStageIndex}, docStageIndex=${docStageIndex}`);
+        
+        // If the document is for the next stage after employee's current stage, advance the stage
+        if (docStageIndex === employeeStageIndex + 1 || 
+            (employeeStageIndex === 0 && documentType === "OPT Receipt" && employee.status === "approved")) {
+          // Advance the stage
+          employee.stage = documentType;
+          employee.status = "approved";
+          const currentDate = new Date();
+          employee.submissionDate = currentDate.toLocaleDateString("en-CA");
+          await employee.save();
+          console.log(`makeDecision: Advanced employee stage to ${documentType}`);
+        } else if (docStageIndex === employeeStageIndex) {
+          // If the document is for the current stage, just update the status
+          if (employee.status === "pending") {
+            employee.status = "approved";
+            await employee.save();
+            console.log(`makeDecision: Updated employee status to approved for stage ${documentType}`);
+          }
+        }
+      }
+      
+      return res.status(200).json({ 
+        stage: employee.stage, 
+        status: employee.status,
+        documentStatus: optDoc.status 
+      });
+    }
+    
+    // Original logic: Employee-level decision (for onboarding or other general approvals)
+    console.log(`makeDecision: Employee-level decision for employee._id=${req.params?.employeeId}, employee.stage=${employee.stage}, employee.status=${employee.status}, decision=${decision}`);
+    
+    if (employee.status === "approved") {
+      console.log(`makeDecision: ERROR - This stage has been approved`);
+      const err = new Error("This stage has been approved");
+      err.statusCode = 400;
+      next(err);
+      return;
+    }
+    
     if (decision === "approved") {
       employee.status = "approved";
     } else if (decision === "rejected") {
       employee.status = "rejected";
-      employee.feedback = req.body.feedback;
+      employee.feedback = feedback;
     } else {
       const err = new Error("Wrong decision content");
       err.statusCode = 500;
       next(err);
       return;
     }
+    
     await employee.save();
     res.status(200).json({ stage: employee.stage, status: employee.status });
   } catch (err) {

@@ -1,11 +1,12 @@
 import React from 'react';
 
-const FilesSummary = ({ uploadedFiles, onPreview, onDownload }) => {
+const FilesSummary = ({ uploadedFiles, formData, onPreview, onDownload }) => {
+  // Only count work auth documents if user is not a citizen/PR
   const hasAnyDocument =
     uploadedFiles.profilePictureDocId ||
     uploadedFiles.driverLicenseDocId ||
-    uploadedFiles.workAuthDocId ||
-    uploadedFiles.optReceiptDocId;
+    (formData?.isPrOrCitizen === "no" && uploadedFiles.workAuthDocId) ||
+    (formData?.isPrOrCitizen === "no" && uploadedFiles.optReceiptDocId);
 
   return (
     <div className="form-section">
@@ -59,8 +60,8 @@ const FilesSummary = ({ uploadedFiles, onPreview, onDownload }) => {
           </div>
         )}
 
-        {/* Work Authorization Document */}
-        {uploadedFiles.workAuthDocId && (
+        {/* Work Authorization Document - Only show if not a citizen/PR */}
+        {uploadedFiles.workAuthDocId && formData?.isPrOrCitizen === "no" && (
           <div className="document-item">
             <div className="document-info">
               <span className="document-name">Work Authorization</span>
@@ -83,8 +84,8 @@ const FilesSummary = ({ uploadedFiles, onPreview, onDownload }) => {
           </div>
         )}
 
-        {/* OPT Receipt (Only for F1 OPT) */}
-        {uploadedFiles.optReceiptDocId && (
+        {/* OPT Receipt (Only for F1 OPT and not a citizen/PR) */}
+        {uploadedFiles.optReceiptDocId && formData?.isPrOrCitizen === "no" && (
           <div className="document-item">
             <div className="document-info">
               <span className="document-name">OPT Receipt</span>

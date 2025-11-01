@@ -89,7 +89,7 @@ const PersonalInformationPage = () => {
     };
 
     fetchData();
-  }, [user?.id]);
+  }, [user?._id]);
 
   // handlers moved to usePIEditing
 

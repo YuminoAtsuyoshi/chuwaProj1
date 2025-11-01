@@ -79,8 +79,8 @@ const HRDashboardPage = () => {
       {/* Main Content */}
       <div className="hr-dashboard-content">
         <div className="welcome-section">
-          <h1>Welcome, HR Manager!</h1>
-          <p>Manage your employee resources and operations.</p>
+          <h1>HR Portal</h1>
+          <p>Manage your workforce efficiently</p>
         </div>
 
         {/* Card Modules */}
@@ -88,26 +88,17 @@ const HRDashboardPage = () => {
           {/* Employee Profiles Card */}
           <div className="info-card">
             <div className="card-header">
+              <div className="card-icon card-icon-blue"></div>
               <h3>Employee Profiles</h3>
-              <div className="card-icon">👥</div>
             </div>
             <div className="card-content">
               <div className="card-description">
-                <p>
-                  View and manage employee profiles, personal information, and
-                  employment details.
-                </p>
-              </div>
-              <div className="card-stats">
-                <div className="stat-item">
-                  <span className="stat-label">Total Employees</span>
-                  <span className="stat-value">-</span>
-                </div>
+                <p>View and manage employee information</p>
               </div>
             </div>
             <div className="card-footer">
               <button onClick={handleViewProfiles} className="card-button">
-                View Details
+                View Details →
               </button>
             </div>
           </div>
@@ -115,17 +106,17 @@ const HRDashboardPage = () => {
           {/* Visa Status Management Card */}
           <div className="info-card">
             <div className="card-header">
+              <div className="card-icon card-icon-green"></div>
               <h3>Visa Status Management</h3>
-              <div className="card-icon">📋</div>
             </div>
             <div className="card-content">
-              <div className="placeholder-content">
-                <p>Review and approve visa documents.</p>
+              <div className="card-description">
+                <p>Review and approve visa documents</p>
               </div>
             </div>
             <div className="card-footer">
               <button onClick={handleViewVisa} className="card-button">
-                View Details
+                View Details →
               </button>
             </div>
           </div>
@@ -133,23 +124,17 @@ const HRDashboardPage = () => {
           {/* Hiring Management Card */}
           <div className="info-card">
             <div className="card-header">
+              <div className="card-icon card-icon-purple"></div>
               <h3>Hiring Management</h3>
-              <div className="card-icon">📊</div>
             </div>
             <div className="card-content">
               <div className="card-description">
-                <p>Manage job postings, applications, and hiring workflows.</p>
-              </div>
-              <div className="card-stats">
-                <div className="stat-item">
-                  <span className="stat-label">Active Postings</span>
-                  <span className="stat-value">-</span>
-                </div>
+                <p>Manage registration tokens and onboarding applications</p>
               </div>
             </div>
             <div className="card-footer">
               <button onClick={handleViewHiring} className="card-button">
-                View Details
+                View Details →
               </button>
             </div>
           </div>

@@ -1,41 +1,232 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { uploadFile, getDocumentUrl, createOpt } from "../../../api/auth";
+import FileUpload from "../../../components/FileUpload";
+import { FileTextIcon, ClockIcon, CheckCircleIcon, XCircleIcon } from "./VisaCardIcons";
 
-// Employee-side section for the OPT Receipt step
-// Props: stage, status, feedback
-const VisaOptReceiptSection = ({ stage, status, feedback }) => {
-  const isActiveStage = stage === "OPT Receipt";
+// Props: currentStage, currentStatus, currentFeedback, employeeId, optDoc, optReceiptFromInfo, onUpdate, setMessage
+const VisaOptReceiptSection = ({
+  currentStage,
+  currentStatus,
+  currentFeedback,
+  employeeId,
+  optDoc,
+  optReceiptFromInfo,
+  onUpdate,
+  setMessage,
+}) => {
+  // OPT Receipt was submitted in onboarding application
+  // Check if document exists in optDoc or optReceiptFromInfo
+  const documentId = optDoc?.doc || optReceiptFromInfo || null;
+  const [uploading, setUploading] = useState(false);
+  const [uploadedDocId, setUploadedDocId] = useState(documentId);
+
+  // Determine if this stage is active (user is at OPT Receipt stage)
+  const isActiveStage = currentStage === "OPT Receipt";
+  // Determine if stage has passed (user is beyond OPT Receipt stage)
+  const isStagePassed = 
+    currentStage === "OPT EAD" || 
+    currentStage === "I-983" || 
+    currentStage === "I-20";
+
+  // Determine status for this specific stage
+  // Priority: 1) Use optDoc.status if exists, 2) Use stage logic based on employee.stage/status
+  const getStageStatus = () => {
+    // If optDoc has its own status, use it
+    if (optDoc?.status) {
+      return optDoc.status;
+    }
+    // Fallback to stage-based logic
+    if (isStagePassed) return "approved";
+    if (isActiveStage) return currentStatus;
+    // OPT Receipt is submitted in onboarding, so if still at onboarding stage, use onboarding status
+    if (currentStage === "onboarding" && documentId) return currentStatus;
+    if (documentId) return "pending";
+    return null;
+  };
+
+  const stageStatus = getStageStatus();
+
+  // Sync uploadedDocId with document sources
+  useEffect(() => {
+    if (documentId) {
+      setUploadedDocId(documentId);
+    }
+  }, [documentId]);
+
+  const handleFileUploadSuccess = async (docId, docUrl) => {
+    try {
+      setUploading(true);
+      // Create OPT record
+      await createOpt({
+        type: "OPT Receipt",
+        doc: docId,
+        employee_id: employeeId,
+      });
+      setUploadedDocId(docId);
+      setMessage("OPT Receipt uploaded successfully!");
+      if (onUpdate) {
+        await onUpdate();
+      }
+    } catch (error) {
+      setMessage(`Failed to upload OPT Receipt: ${error.message || "Unknown error"}`);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleFileUploadError = (error) => {
+    setMessage(`Upload failed: ${error.message || "Unknown error"}`);
+  };
+
+  const handleDocumentDownload = async () => {
+    if (!uploadedDocId) return;
+    try {
+      const response = await getDocumentUrl(uploadedDocId);
+      const link = document.createElement("a");
+      link.href = response.url;
+      link.download = "OPT-Receipt.pdf";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      setMessage(`Download failed: ${error.message || "Unknown error"}`);
+    }
+  };
+
+  const handleDocumentPreview = async () => {
+    if (!uploadedDocId) return;
+    try {
+      const response = await getDocumentUrl(uploadedDocId);
+      window.open(response.url, "_blank");
+    } catch (error) {
+      setMessage(`Preview failed: ${error.message || "Unknown error"}`);
+    }
+  };
+
+  // Determine if user can upload
+  // If rejected, always allow re-upload. Otherwise, only if onboarding approved and no document yet, and not pending
+  const canUpload = stageStatus === "rejected" || (currentStage === "onboarding" && currentStatus === "approved" && !uploadedDocId && stageStatus !== "pending");
+
+  // Get status badge
+  const getStatusBadge = () => {
+    if (!stageStatus) {
+      return <span className="badge badge-not-started">Not Started</span>;
+    }
+    if (stageStatus === "pending") {
+      return <span className="badge badge-pending"><ClockIcon /><span style={{ marginLeft: "4px" }}>Pending</span></span>;
+    }
+    if (stageStatus === "approved") {
+      return <span className="badge badge-approved"><CheckCircleIcon /><span style={{ marginLeft: "4px" }}>Approved</span></span>;
+    }
+    if (stageStatus === "rejected") {
+      return <span className="badge badge-rejected"><XCircleIcon /><span style={{ marginLeft: "4px" }}>Rejected</span></span>;
+    }
+    return null;
+  };
+
+  // Get status message
+  const getStatusMessage = () => {
+    if (stageStatus === "pending") {
+      return {
+        type: "info",
+        message: "Waiting for HR to approve your OPT Receipt.",
+        icon: ClockIcon,
+      };
+    }
+    if (stageStatus === "approved") {
+      return {
+        type: "success",
+        message: "Please upload a copy of your OPT EAD.",
+        icon: CheckCircleIcon,
+      };
+    }
+    if (stageStatus === "rejected") {
+      // Use optDoc.feedback if available, otherwise currentFeedback
+      const feedback = optDoc?.feedback || currentFeedback;
+      return {
+        type: "error",
+        message: `Rejected: ${feedback || "Please review and resubmit."}`,
+        icon: XCircleIcon,
+      };
+    }
+    return null;
+  };
+
+  const statusMsg = getStatusMessage();
+  const uploadedAt = optDoc?.createdAt || (documentId ? "Previously uploaded" : null);
 
   return (
-    <div className="info-section">
-      <div className="section-header">
-        <h3>OPT Receipt</h3>
+    <div className="visa-card">
+      <div className="card-header">
+        <div className="card-header-content">
+          <FileTextIcon />
+          <div className="card-title-section">
+            <h3 className="card-title">OPT Receipt</h3>
+            {uploadedAt && (
+              <p className="card-description">
+                {typeof uploadedAt === 'string' && uploadedAt.includes('T') 
+                  ? `Uploaded: ${new Date(uploadedAt).toLocaleDateString()}`
+                  : uploadedAt}
+              </p>
+            )}
+          </div>
+        </div>
+        {getStatusBadge()}
       </div>
 
-      {!isActiveStage ? (
-        <div className="no-data">
-          <h2>Not available for your current stage</h2>
-          <p>This section will appear when you enter the OPT Receipt stage.</p>
+      <div className="card-content">
+        {statusMsg && (
+          <div className={`alert alert-${statusMsg.type}`}>
+            <statusMsg.icon />
+            <p className="alert-message">{statusMsg.message}</p>
         </div>
-      ) : (
-        <div className="readonly-fields">
-          <div className="field">
-            <label>Status</label>
-            <span className={`status-badge status-${status || "unknown"}`}>
-              {(status || "N/A").toUpperCase()}
-            </span>
+        )}
+
+        {/* Show upload button for not_started or rejected documents */}
+        {(!uploadedDocId || stageStatus === "rejected") && (
+          <div className="card-actions">
+            {canUpload ? (
+              <FileUpload
+                label="Upload OPT Receipt"
+                name="optReceipt"
+                accept=".pdf,.jpg,.jpeg,.png"
+                fileType="OPT Receipt"
+                onUploadSuccess={(docId, docUrl) =>
+                  handleFileUploadSuccess(docId, docUrl)
+                }
+                onUploadError={handleFileUploadError}
+                required={true}
+              />
+            ) : (
+              <button disabled className="btn btn-secondary">
+                Upload OPT Receipt
+              </button>
+            )}
           </div>
-          {feedback && (
-            <div className="field">
-              <label>Feedback</label>
-              <span>{feedback}</span>
+        )}
+
+        {/* Show download/preview for uploaded documents */}
+        {uploadedDocId && (
+          <div className="document-actions">
+            <button
+              onClick={handleDocumentPreview}
+              className="preview-btn"
+              disabled={uploading}
+            >
+              Preview
+            </button>
+            <button
+              onClick={handleDocumentDownload}
+              className="download-btn"
+              disabled={uploading}
+            >
+              Download
+            </button>
             </div>
           )}
         </div>
-      )}
     </div>
   );
 };
 
 export default VisaOptReceiptSection;
-
-

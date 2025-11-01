@@ -51,7 +51,7 @@ const HREmployeeDetailPage = () => {
             citizenship: "United States",
             country_of_birth: "USA",
             is_pr_or_citizen: "no",
-            work_auth_type: "F1(CPT/OPT)",
+            work_auth_type: "F1 OPT",
             application_submitted_date: "2024-01-15",
             application_status: "pending",
           };

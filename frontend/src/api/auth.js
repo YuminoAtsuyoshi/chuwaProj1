@@ -200,12 +200,13 @@ export const generateRegistrationToken = async (email) => {
 
 // Approve employee application (for HR)
 // Using decision endpoint to approve
-export const approveEmployeeApplication = async (employeeId) => {
+// documentType: optional, if provided, this is a document-level approval
+export const approveEmployeeApplication = async (employeeId, documentType = null) => {
   try {
     // Frontend uses simpler API, backend may map to: POST /employees/:employeeId/stage/decision
     const response = await employeeAPI.post(
       `/employees/${employeeId}/stage/decision`,
-      { decision: "approved" }
+      { decision: "approved", documentType }
     );
     return response.data;
   } catch (error) {
@@ -214,12 +215,13 @@ export const approveEmployeeApplication = async (employeeId) => {
 };
 
 // Reject employee application (for HR)
-export const rejectEmployeeApplication = async (employeeId, feedback) => {
+// documentType: optional, if provided, this is a document-level rejection
+export const rejectEmployeeApplication = async (employeeId, feedback, documentType = null) => {
   try {
     // Frontend uses simpler API with feedback, backend may map to: POST /employees/:employeeId/stage/decision
     const response = await employeeAPI.post(
       `/employees/${employeeId}/stage/decision`,
-      { decision: "rejected", feedback }
+      { decision: "rejected", feedback, documentType }
     );
     return response.data;
   } catch (error) {

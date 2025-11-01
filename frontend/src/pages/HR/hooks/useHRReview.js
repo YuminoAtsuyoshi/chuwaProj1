@@ -50,7 +50,7 @@ export const useHRReview = () => {
           date_of_birth: "1990-01-15",
           gender: "male",
           is_pr_or_citizen: "no",
-          work_auth_type: "F1(CPT/OPT)",
+          work_auth_type: "F1 OPT",
           profile_picture_ref: "doc-123",
           driver_license_ref: "doc-456",
           opt_receipt_upload_ref: "doc-789",

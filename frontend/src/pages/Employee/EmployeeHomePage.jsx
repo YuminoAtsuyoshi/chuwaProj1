@@ -86,11 +86,8 @@ const EmployeeHomePage = () => {
   };
 
   const handleApplicationStatusClick = () => {
-    if (employee?.stage === "onboarding") {
-      navigate("/employee/onboarding");
-    } else {
-      console.log("Application status for other stages - to be implemented");
-    }
+    // Application Status always points to onboarding page
+    navigate("/employee/onboarding");
   };
 
   if (loading) {
@@ -189,27 +186,39 @@ const EmployeeHomePage = () => {
               <div className="card-icon">📊</div>
             </div>
             <div className="card-content">
-              <div className="info-item">
-                <span className="info-label">Current Stage:</span>
-                <span className="info-value status-value">
-                  {employee?.stage || "N/A"}
-                </span>
-              </div>
-              <div className="info-item">
-                <span className="info-label">Status:</span>
-                <span
-                  className={`info-value status-badge status-${
-                    employee?.status || "unknown"
-                  }`}
-                >
-                  {employee?.status || "N/A"}
-                </span>
-              </div>
-              {employee?.feedback && (
+              {/* Only show onboarding-related info */}
+              {employee?.stage === "onboarding" ? (
+                <>
+                  <div className="info-item">
+                    <span className="info-label">Current Stage:</span>
+                    <span className="info-value status-value">
+                      Onboarding
+                    </span>
+                  </div>
+                  <div className="info-item">
+                    <span className="info-label">Status:</span>
+                    <span
+                      className={`info-value status-badge status-${
+                        employee?.status || "unknown"
+                      }`}
+                    >
+                      {employee?.status || "N/A"}
+                    </span>
+                  </div>
+                  {employee?.feedback && (
+                    <div className="info-item">
+                      <span className="info-label">Feedback:</span>
+                      <span className="info-value feedback-text">
+                        {employee.feedback}
+                      </span>
+                    </div>
+                  )}
+                </>
+              ) : (
                 <div className="info-item">
-                  <span className="info-label">Feedback:</span>
-                  <span className="info-value feedback-text">
-                    {employee.feedback}
+                  <span className="info-label">Status:</span>
+                  <span className="info-value status-badge status-approved">
+                    Approved
                   </span>
                 </div>
               )}

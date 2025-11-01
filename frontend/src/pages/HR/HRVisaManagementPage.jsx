@@ -1,26 +1,27 @@
 import React, { useState, useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import {
   getAllEmployees,
-  sendNotification,
-  approveEmployeeApplication,
-  rejectEmployeeApplication,
-  getOpts,
 } from "../../api/auth";
-import { useDocActions } from "./hooks/useDocActions";
 import VisaManagementRow from "./components/VisaManagementRow";
+import VisaManagementActionCell from "./components/VisaManagementActionCell";
+import NextStepsCell from "./components/NextStepsCell";
+import HRNav from "../../components/HRNav";
 import "./HRVisaManagementPage.css";
 
 const HRVisaManagementPage = () => {
   const [loading, setLoading] = useState(true);
   const user = useSelector((state) => state.user);
   const navigate = useNavigate();
-  const dispatch = useDispatch();
 
   const [message, setMessage] = useState("");
   const [progressApplications, setProgressApplications] = useState([]);
   const [allApplications, setallApplications] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filteredAllApplications, setFilteredAllApplications] = useState([]);
+  const [filteredProgressApplications, setFilteredProgressApplications] = useState([]);
+  const [activeTab, setActiveTab] = useState("in-progress");
 
   useEffect(() => {
     // Check if user is HR
@@ -32,6 +33,60 @@ const HRVisaManagementPage = () => {
     fetchData();
   }, [user?.isHr, navigate]);
 
+  // Search function
+  const handleSearch = (searchValue) => {
+    setSearchTerm(searchValue);
+    const searchLower = searchValue.toLowerCase().trim();
+    
+    const filterFunc = (emp) => {
+      if (!emp.personInfo) return false;
+      const firstName = (emp.personInfo.firstName || "").toLowerCase();
+      const lastName = (emp.personInfo.lastName || "").toLowerCase();
+      const preferredName = (emp.personInfo.preferredName || "").toLowerCase();
+
+      return (
+        firstName.includes(searchLower) ||
+        lastName.includes(searchLower) ||
+        preferredName.includes(searchLower)
+      );
+    };
+
+    if (!searchValue.trim()) {
+      setFilteredAllApplications(allApplications);
+      setFilteredProgressApplications(progressApplications);
+      return;
+    }
+
+    setFilteredAllApplications(allApplications.filter(filterFunc));
+    setFilteredProgressApplications(progressApplications.filter(filterFunc));
+  };
+
+  // Update filtered applications when applications change
+  useEffect(() => {
+    if (!searchTerm.trim()) {
+      setFilteredAllApplications(allApplications);
+      setFilteredProgressApplications(progressApplications);
+    } else {
+      handleSearch(searchTerm);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allApplications, progressApplications]);
+
+  // Helper function to check if employee is F1 OPT
+  const isF1OPT = (emp) => {
+    if (!emp.personInfo) return false;
+    const { isPrOrCitizen, workAuthType, visaTitle } = emp.personInfo;
+    // Must be non-citizen with F1 OPT work authorization
+    if (isPrOrCitizen === "no" && workAuthType === "F1 OPT") {
+      return true;
+    }
+    // Fallback: check visaTitle for OPT (less reliable)
+    if (isPrOrCitizen === "no" && visaTitle && visaTitle.toUpperCase().includes("OPT")) {
+      return true;
+    }
+    return false;
+  };
+
   const fetchData = async () => {
     try {
       setLoading(true);
@@ -41,8 +96,9 @@ const HRVisaManagementPage = () => {
           data.filter(
             (emp) =>
               emp.personInfo !== null &&
-              (emp.stage !== "I-20" || emp.status !== "approved") &&
-              !emp.isHr
+              !emp.isHr &&
+              isF1OPT(emp) && // Only include F1 OPT employees
+              (emp.stage !== "I-20" || emp.status !== "approved") // Not completed I-20
           )
         ),
         getAllEmployees().then((data) =>
@@ -52,6 +108,8 @@ const HRVisaManagementPage = () => {
 
       setProgressApplications(progressData);
       setallApplications(AllData);
+      setFilteredAllApplications(AllData);
+      setFilteredProgressApplications(progressData);
     } catch (error) {
       console.error("Error fetching data:", error);
       setMessage("Failed to load hiring management data");
@@ -63,29 +121,15 @@ const HRVisaManagementPage = () => {
   if (loading) {
     return (
       <div className="visa-management-container">
+        <HRNav active="visa" />
         <div className="loading">Loading...</div>
       </div>
     );
   }
 
-  const handleViewApplication = (employeeId) => {
-    const url = `/hr/review-onboarding/${employeeId}`;
-    window.open(url, "_blank");
-  };
-
-  const { preview: handleDocumentPreview, download: handleDocumentDownload } =
-    useDocActions(setMessage);
-
-  const onPreview = async (employeeId, stage) => {
-    const result = await getOpts({ employee_id: employeeId, type: stage });
-    const id = result[0].doc;
-    console.log(id);
-    handleDocumentPreview(id);
-  };
-  const onDownload = async (employeeId, stage, filename) => {
-    const result = await getOpts({ employee_id: employeeId, type: stage });
-    const id = result[0].doc;
-    handleDocumentDownload(id, filename);
+  // handleUpdate function for refreshing data after approve/reject
+  const handleUpdate = async () => {
+    await fetchData();
   };
 
   const getFullName = (emp) => {
@@ -103,17 +147,31 @@ const HRVisaManagementPage = () => {
   const getWorkAuthTitle = (emp) => {
     if (!emp.personInfo) return "N/A";
     const { isPrOrCitizen, prOrCitizenType, workAuthType } = emp.personInfo;
-    return isPrOrCitizen === "yes"
-      ? prOrCitizenType || "Citizen/Permanent Resident"
-      : isPrOrCitizen === "no"
-      ? workAuthType || "N/A"
-      : "N/A";
+    if (isPrOrCitizen === "yes") {
+      return prOrCitizenType || "Citizen/Permanent Resident";
+    } else if (isPrOrCitizen === "no") {
+      // Ensure workAuthType is properly formatted (no "F1(CPT/OPT)")
+      if (!workAuthType) return "N/A";
+      // If somehow we have "F1(CPT/OPT)", we should handle it, but ideally this shouldn't exist
+      // Since the form only allows "F1 CPT" or "F1 OPT", this is a safety check
+      const normalized = workAuthType.replace(/F1\s*\(CPT\/OPT\)/gi, "F1 OPT");
+      return normalized;
+    }
+    return "N/A";
   };
 
   const getStartAndEndDate = (emp) => {
-    if (!emp.personInfo) return "N/A to N/A";
-    const { visaStartDate, visaEndDate } = emp.personInfo;
+    if (!emp.personInfo) return "";
+    const { isPrOrCitizen, visaStartDate, visaEndDate } = emp.personInfo;
+    // Only show dates for non-citizens with work authorization
+    if (isPrOrCitizen === "yes") {
+      return ""; // Don't show dates for citizens/permanent residents
+    }
+    // For non-citizens, show dates if available
+    if (visaStartDate || visaEndDate) {
     return `${visaStartDate || "N/A"} to ${visaEndDate || "N/A"}`;
+    }
+    return ""; // Don't show "N/A to N/A" if both are missing
   };
 
   const getDaysBetween = (emp) => {
@@ -135,150 +193,99 @@ const HRVisaManagementPage = () => {
     }
   };
 
-  const getNextSteps = (stage, status) => {
-    if (status === "never_submit") {
-      return "Submit onboarding form";
-    } else if (status === "rejected") {
-      return `Re-submit ${stage}`;
-    } else if (status === "pending") {
-      return `Waiting for HR approval of ${stage}`;
-    } else if (status === "approved") {
-      if (stage === "onboarding") {
-        return "Submit OPT Receipt";
-      } else if (stage === "OPT Receipt") {
-        return "Submit OPT EAD";
-      } else if (stage === "OPT EAD") {
-        return "Submit I-983";
-      } else if (stage === "I-983") {
-        return "Submit I-20";
-      } else if (stage === "I-20") {
-        return "Complete";
-      }
+  // Render search results message
+  const getSearchMessage = (applications) => {
+    if (!searchTerm.trim()) return null;
+    const count = applications.length;
+    if (count === 0) {
+      return "No employees found matching your search.";
+    } else if (count === 1) {
+      return "1 employee found";
+    } else {
+      return `${count} employees found`;
     }
   };
 
-  const getAction = (emp) => {
-    let oldStage, newStage;
-    if (emp.status === "never_submit") {
-      oldStage = "onboarding";
-      newStage = "OPT Receipt";
-      return (
-        <button
-          onClick={async () =>
-            await sendNotification(emp.email, oldStage, newStage)
-          }
-          className="view-btn"
-        >
-          Send Notification
-        </button>
-      );
-    } else if (emp.status === "rejected" || emp.status === "pending") {
-      if (emp.stage === "onboarding") {
+  // Render employee card for In Progress section
+  const renderProgressCard = (employee) => {
+    const daysRemaining = getDaysBetween(employee);
+    const workAuthDates = getStartAndEndDate(employee);
+    const daysValue = daysRemaining ? daysRemaining.replace(" days remaining", "").replace(" day remaining", "").replace("Work visa expired", "0") : "";
+    const daysNum = parseInt(daysValue) || 0;
+    const badgeVariant = daysNum < 60 ? "destructive" : daysNum < 120 ? "secondary" : "outline";
+
         return (
-          <>
-            <button
-              onClick={() => handleViewApplication(emp._id)}
-              className="view-btn"
-            >
-              View Application
-            </button>
-            <br />
-            <button
-              onClick={async () => {
-                await approveEmployeeApplication(emp._id), navigate(0);
-              }}
-              className="approve-btn"
-            >
-              Approve
-            </button>
-            <button
-              onClick={async () => {
-                await rejectEmployeeApplication(emp._id), navigate(0);
-              }}
-              className="reject-btn"
-            >
-              Reject
-            </button>
-          </>
-        );
-      } else {
-        return (
-          <>
-            <div className="document-item">
-              <div className="document-info">
-                <span className="document-name">{emp.stage}</span>
-                <span className="document-type">PDF</span>
-              </div>
-              <div className="document-actions">
-                <button
-                  onClick={() => onPreview(emp._id, emp.stage)}
-                  className="preview-btn"
-                >
-                  Preview
-                </button>
-                <button
-                  onClick={() =>
-                    onDownload(
-                      emp._id,
-                      emp.stage,
-                      `${emp.username}-${emp.stage}`
-                    )
-                  }
-                  className="download-btn"
-                >
-                  Download
-                </button>
-              </div>
+      <div key={employee._id} className="hr-visa-card">
+        <div className="hr-card-grid">
+          <div className="hr-card-field">
+            <span className="hr-card-label">Name</span>
+            <div className="hr-card-value">
+              {getFullName(employee)}
+              {employee.personInfo?.preferredName && (
+                <span className="hr-card-value muted"> ({employee.personInfo.preferredName})</span>
+              )}
             </div>
-            <button
-              onClick={async () => {
-                await approveEmployeeApplication(emp._id), navigate(0);
-              }}
-              className="approve-btn"
-            >
-              Approve
-            </button>
-            <button
-              onClick={async () => {
-                await rejectEmployeeApplication(emp._id), navigate(0);
-              }}
-              className="reject-btn"
-            >
-              Reject
-            </button>
-          </>
-        );
-      }
-    } else if (emp.status === "approved") {
-      if (emp.stage === "onboarding") {
-        oldStage = "onboarding";
-        newStage = "OPT Receipt";
-      } else if (emp.stage === "OPT Receipt") {
-        oldStage = "OPT Receipt";
-        newStage = "OPT EAD";
-      } else if (emp.stage === "OPT EAD") {
-        oldStage = "OPT EAD";
-        newStage = "I-983";
-      } else if (emp.stage === "I-983") {
-        oldStage = "I-983";
-        newStage = "I-20";
-      }
+          </div>
+          
+          <div className="hr-card-field">
+            <span className="hr-card-label">Work Authorization</span>
+            <div className="hr-card-value">
+              {getWorkAuthTitle(employee)}
+              {workAuthDates && (
+                <div className="hr-card-value muted">{workAuthDates}</div>
+              )}
+              {daysRemaining && (
+                <span className={`badge badge-${badgeVariant} ${daysNum < 60 ? "badge-rejected" : daysNum < 120 ? "badge-pending" : "badge-approved"}`} style={{ marginTop: "8px", display: "inline-block" }}>
+                  {daysRemaining}
+                </span>
+              )}
+            </div>
+          </div>
+          
+          <div className="hr-card-field">
+            <span className="hr-card-label">Next Steps</span>
+            <div className="hr-card-value">
+              <NextStepsCell employee={employee} />
+              </div>
+              </div>
+          
+          <div className="hr-card-field">
+            <span className="hr-card-label">Action</span>
+            <div className="hr-card-value">
+              <VisaManagementActionCell
+                employee={employee}
+                onUpdate={handleUpdate}
+                setMessage={setMessage}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Render employee card for All section
+  const renderAllCard = (employee) => {
       return (
-        <button
-          onClick={async () => sendNotification(emp.email, oldStage, newStage)}
-          className="view-btn"
-        >
-          Send Notification
-        </button>
+      <VisaManagementRow
+        key={employee._id}
+        getFullName={getFullName}
+        getWorkAuthTitle={getWorkAuthTitle}
+        getStartAndEndDate={getStartAndEndDate}
+        getDaysBetween={getDaysBetween}
+        data={employee}
+        showApprovedDocsOnly={true}
+        renderAsCard={true}
+      />
       );
-    }
   };
 
   return (
     <div className="visa-management-container">
+      <HRNav active="visa" />
       <div className="page-header">
-        <h1>Visa Management</h1>
-        <p>Review and approve visa documents.</p>
+        <h1>Visa Status Management</h1>
+        <p>Manage employee visa documents and approvals</p>
       </div>
       {message && (
         <div
@@ -289,85 +296,97 @@ const HRVisaManagementPage = () => {
           {message}
         </div>
       )}
-      {/* In Progress Section */}
-      <div className="section">
-        <div className="section-header">
-          <h2>📥 In progress</h2>
+
+      {/* Tabs */}
+      <div className="tabs-container">
+        <div className="tabs-list">
+          <button
+            className={`tab-trigger ${activeTab === "in-progress" ? "active" : ""}`}
+            onClick={() => setActiveTab("in-progress")}
+          >
+            In Progress
+          </button>
+          <button
+            className={`tab-trigger ${activeTab === "all" ? "active" : ""}`}
+            onClick={() => setActiveTab("all")}
+          >
+            All
+          </button>
         </div>
-        {progressApplications.length === 0 ? (
+
+        {/* In Progress Tab */}
+        <div className={`tab-content ${activeTab === "in-progress" ? "active" : ""}`}>
+          <div className="search-wrapper">
+            <svg className="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <input
+              type="text"
+              placeholder="Search by first name, last name, or preferred name..."
+              value={searchTerm}
+              onChange={(e) => handleSearch(e.target.value)}
+            />
+          </div>
+
+          {getSearchMessage(filteredProgressApplications) && (
+            <div style={{ marginBottom: "16px" }}>
+              <span className="badge badge-secondary">{getSearchMessage(filteredProgressApplications)}</span>
+            </div>
+          )}
+
+          {filteredProgressApplications.length > 0 && (
+            <div style={{ marginBottom: "16px" }}>
+              <span className="badge badge-secondary">{filteredProgressApplications.length} employees in progress</span>
+            </div>
+          )}
+
+          {filteredProgressApplications.length === 0 ? (
           <div className="no-data">
-            <p>No employee in progress.</p>
+              <p>{searchTerm ? "No employees found matching your search." : "No employee in progress."}</p>
           </div>
         ) : (
-          <div className="table-container">
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>Full Name</th>
-                  <th>Work Authorization</th>
-                  <th>Next Steps</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {progressApplications.map((data) => {
-                  return (
-                    <tr key={data._id}>
-                      <td>{getFullName(data)}</td>
-                      <td>
-                        {getWorkAuthTitle(data)}
-                        <br />
-                        {getStartAndEndDate(data)}
-                        <br />
-                        {getDaysBetween(data)}
-                      </td>
-                      <td>{getNextSteps(data.stage, data.status)}</td>
-                      <td>{getAction(data)}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+            <div>
+              {filteredProgressApplications.map(renderProgressCard)}
           </div>
         )}
-      </div>
-      {/* All Section */}
-      <div className="section">
-        <div className="section-header">
-          <h2>📋 All</h2>
         </div>
-        {allApplications.length === 0 ? (
+
+        {/* All Tab */}
+        <div className={`tab-content ${activeTab === "all" ? "active" : ""}`}>
+          <div className="search-wrapper">
+            <svg className="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <input
+              type="text"
+              placeholder="Search by first name, last name, or preferred name..."
+              value={searchTerm}
+              onChange={(e) => handleSearch(e.target.value)}
+            />
+          </div>
+
+          {getSearchMessage(filteredAllApplications) && (
+            <div style={{ marginBottom: "16px" }}>
+              <span className="badge badge-secondary">{getSearchMessage(filteredAllApplications)}</span>
+            </div>
+          )}
+
+          {filteredAllApplications.length > 0 && (
+            <div style={{ marginBottom: "16px" }}>
+              <span className="badge badge-secondary">{filteredAllApplications.length} total employees</span>
+            </div>
+          )}
+
+          {filteredAllApplications.length === 0 ? (
           <div className="no-data">
-            <p>No employee now.</p>
+              <p>{searchTerm ? "No employees found matching your search." : "No employee now."}</p>
           </div>
         ) : (
-          <div className="table-container">
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>Full Name</th>
-                  <th>Work Authorization</th>
-                  <th>Next Steps</th>
-                  <th>Document</th>
-                </tr>
-              </thead>
-              <tbody>
-                {allApplications.map((data) => {
-                  return (
-                    <VisaManagementRow
-                      getFullName={getFullName}
-                      getWorkAuthTitle={getWorkAuthTitle}
-                      getStartAndEndDate={getStartAndEndDate}
-                      getDaysBetween={getDaysBetween}
-                      getNextSteps={getNextSteps}
-                      data={data}
-                    />
-                  );
-                })}
-              </tbody>
-            </table>
+            <div>
+              {filteredAllApplications.map(renderAllCard)}
           </div>
         )}
+        </div>
       </div>
     </div>
   );

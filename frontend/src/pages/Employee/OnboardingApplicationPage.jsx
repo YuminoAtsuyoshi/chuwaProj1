@@ -99,7 +99,7 @@ const OnboardingApplicationPage = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      // Check for test user data first (for testing without backend)
+      // Check for test user data  (for testing without backend)
       const testUser = localStorage.getItem("testUser");
       if (testUser) {
         try {
@@ -110,14 +110,8 @@ const OnboardingApplicationPage = () => {
             email: testUserData.email || "",
           }));
 
-          // Handle approved status redirection
-          if (
-            testUserData.stage === "onboarding" &&
-            testUserData.status === "approved"
-          ) {
-            navigate("/employee/dashboard");
-            return;
-          }
+          // Don't redirect approved onboarding - let user view their approved application
+  
 
           setLoading(false);
           return;
@@ -135,14 +129,7 @@ const OnboardingApplicationPage = () => {
         const employeeData = await getEmployeeDetails(user._id);
         setEmployee(employeeData);
 
-        // Handle approved status redirection
-        if (
-          employeeData.stage === "onboarding" &&
-          employeeData.status === "approved"
-        ) {
-          navigate("/employee/dashboard");
-          return;
-        }
+        // Don't redirect approved onboarding - let user view their approved application
 
         // Pre-fill email from employee data
         setFormData((prev) => ({
@@ -160,7 +147,6 @@ const OnboardingApplicationPage = () => {
             setFormData((prev) => ({
               ...prev,
               ...employeeData,
-              // Handle emergency contacts array
               emergencyContacts: employeeData.emergencyContacts || [
                 {
                   firstName: "",
@@ -257,8 +243,12 @@ const OnboardingApplicationPage = () => {
           next.visaEndDate = "";
           // Clear any related errors
           next.workAuthType = "";
-          next.workAuthDocId = "";
-          next.optReceiptDocId = "";
+          // Clear uploaded files for work authorization documents
+          setUploadedFiles((prev) => ({
+            ...prev,
+            workAuthDocId: null,
+            optReceiptDocId: null,
+          }));
         }
       } else if ((name === "visaStartDate" || name === "visaEndDate") &&
                  formData.isPrOrCitizen === "no" && formData.workAuthType) {
@@ -353,11 +343,11 @@ const OnboardingApplicationPage = () => {
 
     // File upload validation
     if (
-      formData.workAuthType === "F1(CPT/OPT)" &&
+      formData.workAuthType === "F1 OPT" &&
       !uploadedFiles.optReceiptDocId
     ) {
       newErrors.optReceiptDocId =
-        "OPT Receipt is required for F1(CPT/OPT) work authorization";
+        "OPT Receipt is required for F1 OPT work authorization";
     }
 
     // Emergency contacts validation
@@ -398,12 +388,20 @@ const OnboardingApplicationPage = () => {
 
   // Check user access and determine UI state
   const isOnboardingStage = employee?.stage === "onboarding";
+  // Allow access if:
+  // 1. Stage is onboarding (for never_submit, pending, approved, rejected)
+  // 2. Status is rejected (regardless of stage - to view feedback and resubmit)
+  // 3. Status is approved (regardless of stage - to view approved onboarding application)
+  const canAccess =
+    isOnboardingStage || employee?.status === "rejected" || employee?.status === "approved";
   const canEditForm =
-    isOnboardingStage &&
+    canAccess &&
     (employee?.status === "never_submit" || employee?.status === "rejected");
   const isPendingState = isOnboardingStage && employee?.status === "pending";
+  const isApprovedState = (isOnboardingStage || employee?.status === "approved") && employee?.status === "approved";
 
-  if (!isOnboardingStage) {
+  // Deny access if user doesn't meet the criteria
+  if (!canAccess) {
     return (
       <div className="onboarding-container">
         <div className="access-denied">
@@ -573,6 +571,7 @@ const OnboardingApplicationPage = () => {
           {/* Document Management Section */}
           <FilesSummary
             uploadedFiles={uploadedFiles}
+            formData={formData}
             onPreview={handleDocumentPreview}
             onDownload={handleDocumentDownload}
           />
@@ -595,8 +594,228 @@ const OnboardingApplicationPage = () => {
     );
   }
 
+  // Render approved state UI (read-only)
+  if (isApprovedState) {
+    return (
+      <div className="onboarding-container">
+        <EmployeeNav active="onboarding" />
+        <div className="onboarding-header">
+          <h1>Employee Onboarding Application</h1>
+          <div className="approved-message">
+            <h2>✓ Your onboarding application has been approved by HR!</h2>
+            <p>
+              You can now proceed to the visa status management page to submit your visa documents.
+            </p>
+          </div>
+        </div>
+
+        {/* Read-only form display - same as pending state */}
+        <div className="readonly-form">
+          <div className="form-section">
+            <h3>Personal Details</h3>
+            <div className="readonly-field-group">
+              <div className="readonly-field">
+                <label>First Name:</label>
+                <span>{formData.firstName}</span>
+              </div>
+              <div className="readonly-field">
+                <label>Last Name:</label>
+                <span>{formData.lastName}</span>
+              </div>
+              <div className="readonly-field">
+                <label>Middle Name:</label>
+                <span>{formData.middleName || "N/A"}</span>
+              </div>
+              <div className="readonly-field">
+                <label>Preferred Name:</label>
+                <span>{formData.preferredName || "N/A"}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="form-section">
+            <h3>Current Address</h3>
+            <div className="readonly-field-group">
+              <div className="readonly-field">
+                <label>Building/Apartment:</label>
+                <span>{formData.addressBuilding}</span>
+              </div>
+              <div className="readonly-field">
+                <label>Street Address:</label>
+                <span>{formData.addressStreet}</span>
+              </div>
+              <div className="readonly-field">
+                <label>City:</label>
+                <span>{formData.addressCity}</span>
+              </div>
+              <div className="readonly-field">
+                <label>State:</label>
+                <span>{formData.addressState}</span>
+              </div>
+              <div className="readonly-field">
+                <label>Zip Code:</label>
+                <span>{formData.addressZip}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="form-section">
+            <h3>Contact Information</h3>
+            <div className="readonly-field-group">
+              <div className="readonly-field">
+                <label>Email:</label>
+                <span>{formData.email}</span>
+              </div>
+              <div className="readonly-field">
+                <label>Cell Phone:</label>
+                <span>{formData.cellPhone}</span>
+              </div>
+              {formData.workPhone && (
+                <div className="readonly-field">
+                  <label>Work Phone:</label>
+                  <span>{formData.workPhone}</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="form-section">
+            <h3>Identity Information</h3>
+            <div className="readonly-field-group">
+              <div className="readonly-field">
+                <label>SSN:</label>
+                <span>{formData.ssn}</span>
+              </div>
+              <div className="readonly-field">
+                <label>Date of Birth:</label>
+                <span>{formData.dateOfBirth}</span>
+              </div>
+              <div className="readonly-field">
+                <label>Gender:</label>
+                <span>{formData.gender}</span>
+              </div>
+            </div>
+          </div>
+
+          {formData.isPrOrCitizen === "yes" && (
+            <div className="form-section">
+              <h3>Citizenship Information</h3>
+              <div className="readonly-field-group">
+                <div className="readonly-field">
+                  <label>Citizenship Type:</label>
+                  <span>{formData.prOrCitizenType}</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {formData.isPrOrCitizen === "no" && (
+            <div className="form-section">
+              <h3>Work Authorization Information</h3>
+              <div className="readonly-field-group">
+                <div className="readonly-field">
+                  <label>Work Authorization Type:</label>
+                  <span>{formData.workAuthType}</span>
+                </div>
+                {formData.visaTitle && (
+                  <div className="readonly-field">
+                    <label>Visa Title:</label>
+                    <span>{formData.visaTitle}</span>
+                  </div>
+                )}
+                {formData.visaStartDate && (
+                  <div className="readonly-field">
+                    <label>Visa Start Date:</label>
+                    <span>{formData.visaStartDate}</span>
+                  </div>
+                )}
+                {formData.visaEndDate && (
+                  <div className="readonly-field">
+                    <label>Visa End Date:</label>
+                    <span>{formData.visaEndDate}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          <div className="form-section">
+            <h3>Reference</h3>
+            <div className="readonly-field-group">
+              <div className="readonly-field">
+                <label>First Name:</label>
+                <span>{formData.referenceFirstName}</span>
+              </div>
+              <div className="readonly-field">
+                <label>Last Name:</label>
+                <span>{formData.referenceLastName}</span>
+              </div>
+              {formData.referenceMiddleName && (
+                <div className="readonly-field">
+                  <label>Middle Name:</label>
+                  <span>{formData.referenceMiddleName}</span>
+                </div>
+              )}
+              <div className="readonly-field">
+                <label>Phone:</label>
+                <span>{formData.referencePhone}</span>
+              </div>
+              <div className="readonly-field">
+                <label>Email:</label>
+                <span>{formData.referenceEmail}</span>
+              </div>
+              <div className="readonly-field">
+                <label>Relationship:</label>
+                <span>{formData.referenceRelationship}</span>
+              </div>
+            </div>
+          </div>
+
+          {formData.emergencyContact && formData.emergencyContact.length > 0 && (
+            <div className="form-section">
+              <h3>Emergency Contacts</h3>
+              {formData.emergencyContact.map((contact, index) => (
+                <div key={index} className="readonly-field-group">
+                  <div className="readonly-field">
+                    <label>First Name:</label>
+                    <span>{contact.firstName}</span>
+                  </div>
+                  <div className="readonly-field">
+                    <label>Last Name:</label>
+                    <span>{contact.lastName}</span>
+                  </div>
+                  {contact.middleName && (
+                    <div className="readonly-field">
+                      <label>Middle Name:</label>
+                      <span>{contact.middleName}</span>
+                    </div>
+                  )}
+                  <div className="readonly-field">
+                    <label>Phone:</label>
+                    <span>{contact.phone}</span>
+                  </div>
+                  {contact.email && (
+                    <div className="readonly-field">
+                      <label>Email:</label>
+                      <span>{contact.email}</span>
+                    </div>
+                  )}
+                  <div className="readonly-field">
+                    <label>Relationship:</label>
+                    <span>{contact.relationship}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="onboarding-container">
+      <EmployeeNav active="onboarding" />
       <div className="onboarding-header">
         <h1>Employee Onboarding Application</h1>
         <p>
@@ -606,10 +825,19 @@ const OnboardingApplicationPage = () => {
       </div>
 
       {/* HR Feedback for rejected status */}
-      {employee?.status === "rejected" && employee?.feedback && (
-        <div className="feedback-alert">
-          <h3>HR Feedback</h3>
-          <p>{employee.feedback}</p>
+      {employee?.status === "rejected" && (
+        <div className="feedback-alert rejected-feedback">
+          <h3>❌ Application Rejected - HR Feedback</h3>
+          <div className="feedback-content">
+            {employee?.feedback ? (
+              <p><strong>Feedback:</strong> {employee.feedback}</p>
+            ) : (
+              <p><em>No feedback provided by HR.</em></p>
+            )}
+            <p className="feedback-instruction">
+              Please review the feedback above, make necessary changes to your application, and resubmit.
+            </p>
+          </div>
         </div>
       )}
 
@@ -668,6 +896,7 @@ const OnboardingApplicationPage = () => {
         {/* Summary of Uploaded Files or Documents */}
         <FilesSummary
           uploadedFiles={uploadedFiles}
+          formData={formData}
           onPreview={handleDocumentPreview}
           onDownload={handleDocumentDownload}
         />

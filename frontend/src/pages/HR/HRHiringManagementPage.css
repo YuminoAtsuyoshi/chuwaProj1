@@ -1,9 +1,12 @@
 .hiring-management-container {
-  padding: 20px;
+  background-color: #f8f9fa;
+  min-height: 100vh;
+}
+
+.page-content {
   max-width: 1400px;
   margin: 0 auto;
-  background-color: #f5f5f5;
-  min-height: 100vh;
+  padding: 30px;
 }
 
 .loading {
@@ -14,23 +17,55 @@
 }
 
 .page-header {
-  background: white;
-  padding: 30px;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   margin-bottom: 30px;
-  text-align: center;
+  text-align: left;
 }
 
 .page-header h1 {
   color: #333;
-  margin-bottom: 10px;
+  margin: 0 0 10px 0;
   font-size: 32px;
+  font-weight: 600;
 }
 
 .page-header p {
   color: #666;
   font-size: 16px;
+  margin: 0;
+}
+
+/* Tabs */
+.page-tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 30px;
+  background-color: white;
+  border-radius: 8px;
+  padding: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.tab-button {
+  flex: 1;
+  padding: 12px 24px;
+  border: none;
+  background-color: transparent;
+  color: #666;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.tab-button:hover {
+  background-color: #f8f9fa;
+}
+
+.tab-button.active {
+  background-color: #007bff;
+  color: white;
+  font-weight: 600;
 }
 
 .message {
@@ -53,11 +88,68 @@
   border: 1px solid #f5c6cb;
 }
 
+/* Registration Token Card */
+.token-card {
+  background: white;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  margin-bottom: 30px;
+}
+
+.token-card-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.token-card-text h3 {
+  margin: 0 0 8px 0;
+  color: #333;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.token-card-text p {
+  margin: 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.generate-token-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+}
+
+.generate-token-btn:hover:not(:disabled) {
+  background-color: #0056b3;
+}
+
+.generate-token-btn:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+}
+
+.btn-icon {
+  font-size: 16px;
+}
+
+/* Section */
 .section {
   background: white;
   padding: 30px;
   border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   margin-bottom: 30px;
 }
 
@@ -65,36 +157,20 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 25px;
+  margin-bottom: 20px;
   padding-bottom: 15px;
   border-bottom: 2px solid #007bff;
 }
 
-.section-header h2 {
+.section-title {
   color: #333;
+  margin: 0 0 25px 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.section-header .section-title {
   margin: 0;
-  font-size: 24px;
-}
-
-.generate-btn {
-  background-color: #28a745;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  transition: background-color 0.3s ease;
-}
-
-.generate-btn:hover:not(:disabled) {
-  background-color: #218838;
-}
-
-.generate-btn:disabled {
-  background-color: #6c757d;
-  cursor: not-allowed;
 }
 
 .no-data {
@@ -119,18 +195,19 @@
 }
 
 .data-table th {
-  padding: 16px 12px;
+  padding: 14px 12px;
   text-align: left;
   font-weight: 600;
-  font-size: 14px;
+  font-size: 13px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .data-table td {
-  padding: 16px 12px;
+  padding: 14px 12px;
   border-bottom: 1px solid #e9ecef;
   font-size: 14px;
+  color: #333;
 }
 
 .data-table tbody tr:hover {
@@ -141,12 +218,44 @@
   border-bottom: none;
 }
 
-.token-cell {
-  font-family: monospace;
-  font-size: 12px;
-  word-break: break-all;
+/* Registration Link Cell */
+.registration-link-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
+.registration-link {
+  color: #007bff;
+  text-decoration: none;
+  font-size: 12px;
+}
+
+.registration-link:hover {
+  text-decoration: underline;
+}
+
+.copy-icon {
+  cursor: pointer;
+  font-size: 14px;
+  opacity: 0.6;
+}
+
+.copy-icon:hover {
+  opacity: 1;
+}
+
+/* Time Remaining */
+.expired-time {
+  color: #6c757d;
+}
+
+.clock-icon {
+  margin-right: 4px;
+  font-size: 12px;
+}
+
+/* Status Badges */
 .status-badge {
   display: inline-block;
   padding: 4px 12px;
@@ -156,7 +265,23 @@
   text-transform: uppercase;
 }
 
-.status-valid {
+.status-grey {
+  background-color: #6c757d;
+  color: white;
+}
+
+.status-green {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.status-orange {
+  background-color: #ffc107;
+  color: #856404;
+}
+
+.status-valid,
+.status-submitted {
   background-color: #d4edda;
   color: #155724;
 }
@@ -169,11 +294,6 @@
 .status-not-submitted {
   background-color: #e2e3e5;
   color: #383d41;
-}
-
-.status-submitted {
-  background-color: #d4edda;
-  color: #155724;
 }
 
 .action-buttons {
@@ -232,15 +352,25 @@
   background-color: #0056b3;
 }
 
-.registration-link {
-  color: #007bff;
-  text-decoration: none;
-  word-break: break-all;
-  font-size: 12px;
+.generate-btn {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.3s ease;
 }
 
-.registration-link:hover {
-  text-decoration: underline;
+.generate-btn:hover:not(:disabled) {
+  background-color: #218838;
+}
+
+.generate-btn:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
 }
 
 .applications-section {
@@ -338,12 +468,8 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
-  .hiring-management-container {
-    padding: 10px;
-  }
-
-  .page-header {
-    padding: 20px;
+  .page-content {
+    padding: 15px;
   }
 
   .page-header h1 {
@@ -360,7 +486,13 @@
     align-items: flex-start;
   }
 
-  .generate-btn {
+  .token-card-content {
+    flex-direction: column;
+    gap: 20px;
+    align-items: flex-start;
+  }
+
+  .generate-token-btn {
     width: 100%;
   }
 
@@ -383,8 +515,8 @@
 }
 
 @media (max-width: 480px) {
-  .section-header h2 {
-    font-size: 20px;
+  .section-title {
+    font-size: 18px;
   }
 
   .page-header h1 {
@@ -393,5 +525,14 @@
 
   .modal-content h3 {
     font-size: 20px;
+  }
+
+  .page-tabs {
+    padding: 2px;
+  }
+
+  .tab-button {
+    padding: 10px 16px;
+    font-size: 14px;
   }
 }

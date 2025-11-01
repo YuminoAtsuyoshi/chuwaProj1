@@ -23,7 +23,7 @@ const createToken = async (req, res, next) => {
 const getTokens = async (req, res, next) => {
   try {
     const tokens = await Token.find({}).lean();
-    // enrich with submitted flag and basic employee info if exists
+    // fulfill with submitted flag and basic employee info if exists
     const emails = tokens.map((t) => t.email);
     const employees = await Employee.find(
       { email: { $in: emails } },
@@ -58,6 +58,18 @@ const SendNotification = async (req, res, next) => {
     const email = req.body.email;
     const oldStage = req.body.oldStage;
     const newStage = req.body.newStage;
+    
+    // Find employee by email and advance their stage
+    const employee = await Employee.findOne({ email: email });
+    if (employee) {
+      // Advance stage only if currently approved at the old stage
+      if (employee.stage === oldStage && employee.status === "approved") {
+        employee.stage = newStage;
+        employee.submissionDate = new Date().toISOString().slice(0, 10);
+        await employee.save();
+      }
+    }
+    
     await sendNotificationEmail(email, oldStage, newStage);
     res.status(200).json({ status: "Email sent" });
   } catch (err) {

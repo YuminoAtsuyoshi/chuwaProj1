@@ -39,25 +39,37 @@ app.get("/health", (req, res) => {
 // Get image & pdf file
 app.get("/fileStorage/:filename", (req, res) => {
   const filename = req.params.filename;
-  if (filename.endsWith(".pdf")) {
-    // Stream/serve PDF for in-browser preview
     const filePath = path.join(UPLOAD_DIR, filename);
+  
+  // Check if file exists first
+  fs.access(filePath, fs.constants.F_OK, (accessErr) => {
+    if (accessErr) {
+      console.error("File not found: ", filePath);
+      if (!res.headersSent) {
+        res.status(404).send("File not found.");
+      }
+      return;
+    }
+    
+    // File exists, proceed to read it
     fs.readFile(filePath, (err, data) => {
       if (err) {
-        console.error("Error reading pdf: ", err);
-        res.status(500).send("Error reading pdf.");
+        console.error("Error reading file: ", err);
+        if (!res.headersSent) {
+          res.status(500).send("Error reading file.");
+        }
         return;
       }
+      
+      if (res.headersSent) {
+        return; // Response already sent
+      }
+      
+      if (filename.endsWith(".pdf")) {
       res.setHeader("Content-Type", "application/pdf");
       res.status(200).send(data);
-    });
   } else {
     // jpg & png
-    fs.readFile(path.join(UPLOAD_DIR, filename), (err, data) => {
-      if (err) {
-        console.error("Error reading image: ", err);
-        res.status(500).send("Error reading image.");
-      }
       let contentType = "application/octet-stream"; // Default
       if (filename.endsWith(".png")) {
         contentType = "image/png";
@@ -66,8 +78,9 @@ app.get("/fileStorage/:filename", (req, res) => {
       }
       res.setHeader("Content-Type", contentType);
       res.status(200).send(data);
+      }
     });
-  }
+  });
 });
 
 app.use(errorHandlerMiddleware);
