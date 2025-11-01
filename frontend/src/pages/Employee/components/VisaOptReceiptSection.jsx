@@ -28,8 +28,7 @@ const VisaOptReceiptSection = ({
     currentStage === "I-983" || 
     currentStage === "I-20";
 
-  // Determine status for this specific stage
-  // Priority: 1) Use optDoc.status if exists, 2) Use stage logic based on employee.stage/status
+  // 1) Use optDoc.status if exists, 2) Use stage logic based on employee.stage/status
   const getStageStatus = () => {
     // If optDoc has its own status, use it
     if (optDoc?.status) {

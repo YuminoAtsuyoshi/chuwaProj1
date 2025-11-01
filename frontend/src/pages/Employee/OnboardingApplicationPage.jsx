@@ -137,12 +137,10 @@ const OnboardingApplicationPage = () => {
           email: employeeData.email || "",
         }));
 
-        // Try to fetch existing employeer info
         try {
           const employeeData = await getEmployeerInfo(user._id);
           setEmployeeInfo(employeeData);
 
-          // Pre-fill form with existing data
           if (employeeData) {
             setFormData((prev) => ({
               ...prev,
@@ -205,7 +203,7 @@ const OnboardingApplicationPage = () => {
         const digits = (value || "").replace(/\D/g, "");
         next.ssn = /^\d{9}$/.test(digits) ? "" : "SSN must be exactly 9 digits";
       } else if (name === "dateOfBirth" && value) {
-        // Native min validation (prevents 0011 etc.)
+        // Native  validation (prevents 0011 etc.)
         if (validity && validity.rangeUnderflow) {
           next.dateOfBirth = "Date of birth must be after 1900-01-01.";
           return next;

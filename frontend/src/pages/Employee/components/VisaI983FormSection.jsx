@@ -3,7 +3,7 @@ import { uploadFile, getDocumentUrl, createOpt } from "../../../api/auth";
 import FileUpload from "../../../components/FileUpload";
 import { FileTextIcon, ClockIcon, CheckCircleIcon, XCircleIcon, DownloadIcon } from "./VisaCardIcons";
 
-// Employee-side section for the I-983 Training Plan step
+
 // Props: currentStage, currentStatus, currentFeedback, employeeId, optDoc, prevDoc, prevDocType, onUpdate, setMessage
 const VisaI983FormSection = ({
   currentStage,
@@ -22,11 +22,10 @@ const VisaI983FormSection = ({
 
   // Determine if this stage is active (user is at I-983 stage)
   const isActiveStage = currentStage === "I-983";
-  // Determine if stage has passed (user is beyond I-983 stage)
+  // Determine if stage has passed 
   const isStagePassed = currentStage === "I-20";
 
-  // Determine status for this specific stage
-  // Priority: 1) Use optDoc.status if exists, 2) Use stage logic based on employee.stage/status
+  //1) Use optDoc.status if exists, 2) Use stage logic based on employee.stage/status
   const getStageStatus = () => {
     // If optDoc has its own status, use it
     if (optDoc?.status) {
@@ -41,8 +40,7 @@ const VisaI983FormSection = ({
 
   const stageStatus = getStageStatus();
 
-  // Check if previous document (OPT EAD) is approved
-  // Priority: 1) Check if OPT EAD optDoc has approved status, 2) Use stage logic
+  // 1) Check if OPT EAD optDoc has approved status, 2) Use stage logic
   const isPrevDocApproved = 
     prevDoc?.status === "approved" ||
     currentStage === "I-983" || 
